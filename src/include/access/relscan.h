@@ -123,6 +123,8 @@ typedef struct IndexScanDescData
 	struct ScanKeyData *orderByData;	/* array of ordering op descriptors */
 	bool		xs_want_itup;	/* caller requests index tuples */
 	bool		xs_temp_snap;	/* unregister snapshot at scan end? */
+	bool        hasRowSecurity; /*DBMS: RLS flag*/
+
 
 	/* signaling to index AM about killing index tuples */
 	bool		kill_prior_tuple;	/* last-returned tuple is dead */

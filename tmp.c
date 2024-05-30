@@ -1,4 +1,4 @@
-static TupleTableSlot * IndexNext(IndexScanState *node)
+static TupleTableSlot * IndexNext(IndexScanState *node) 
     while (bool index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *slot))
             tid = ItemPointer index_getnext_tid(IndexScanDesc scan, ScanDirection direction)
                                 found = bool btgettuple(IndexScanDesc scan, ScanDirection dir)

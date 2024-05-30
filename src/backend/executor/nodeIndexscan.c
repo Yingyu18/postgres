@@ -124,6 +124,7 @@ IndexNext(IndexScanState *node)
 						 node->iss_OrderByKeys, node->iss_NumOrderByKeys);
 	}
 
+	
 	/*
 	 * ok, now that we have what we need, fetch the next tuple.
 	 */
