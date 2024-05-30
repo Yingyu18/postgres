@@ -123,8 +123,8 @@ IndexNext(IndexScanState *node)
 						 node->iss_ScanKeys, node->iss_NumScanKeys,
 						 node->iss_OrderByKeys, node->iss_NumOrderByKeys);
 	}
+	scandesc->hasRowSecurity= node->ss.ps.hasRowSecurity;
 
-	
 	/*
 	 * ok, now that we have what we need, fetch the next tuple.
 	 */
