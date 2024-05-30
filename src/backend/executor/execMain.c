@@ -351,6 +351,8 @@ standard_ExecutorRun(QueryDesc *queryDesc,
 	if (sendTuples)
 		dest->rStartup(dest, operation, queryDesc->tupDesc);
 
+	/*DBMS*/
+	queryDesc->planstate->hasRowSecurity = queryDesc->plannedstmt->hasRowSecurity;
 	/*
 	 * run plan
 	 */

@@ -13,16 +13,18 @@ static TupleTableSlot * IndexNext(IndexScanState *node)
 			    return true;
     return slot;
 
-ProcessQuery(PlannedStmt* pstmt,...); // pstmt 也要有 RLS flag?
-    ExecuteStart(queryDesc)
-    ExecuteQuery(queryDesc)
 
-PlannedStmt *pg_plan_query(Query *querytree, ...) // 從含 RLS 資訊的 Query 生出 PlannedStmt 
-    plan = PlannedStmt *planner(Query *parse, const char *query_string, int cursorOptions, ParamListInfo boundParams)
 
 pg_rewrite_query(Query *query) // 如果有 policy 產生出來的 Query List 也會有 policy
     QueryRewrite()
         fireRIRrules()
+
+PlannedStmt *pg_plan_query(Query *querytree, ...) // 從含 RLS 資訊的 rewritted Query 生出 PlannedStmt 
+    plan = PlannedStmt *planner(Query *parse, const char *query_string, int cursorOptions, ParamListInfo boundParams)
+
+ProcessQuery(PlannedStmt* pstmt,...); // pstmt 也要有 RLS flag?
+    ExecuteStart(queryDesc)
+    ExecuteQuery(queryDesc)
 
 /* TODO: 
     1.save redundant item to scan.   好像存 heapId 就可以了耶
