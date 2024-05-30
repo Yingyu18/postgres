@@ -152,6 +152,7 @@ ProcessQuery(PlannedStmt *plan,
 	/*
 	 * Call ExecutorStart to prepare the plan for execution
 	 */
+	// queryDesc->PlannedStmt = PlannedStmt *plan 
 	ExecutorStart(queryDesc, 0);
 
 	/*
