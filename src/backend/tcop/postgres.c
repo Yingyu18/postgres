@@ -903,6 +903,8 @@ pg_plan_query(Query *querytree, const char *query_string, int cursorOptions,
 	/* call the optimizer */
 	plan = planner(querytree, query_string, cursorOptions, boundParams);
 	/*DBMS TODO:？*/
+	if (querytree->hasRowSecurity==true)
+		plan->hasRowSecurity = true;
 
 	if (log_planner_stats)
 		ShowUsage("PLANNER STATISTICS");

@@ -1200,6 +1200,7 @@ typedef struct PlanState
 	bool		outeropsset;
 	bool		inneropsset;
 	bool		resultopsset;
+	bool        hasRowSecurity; /*DBMS: RLS flag*/
 } PlanState;
 
 /* ----------------

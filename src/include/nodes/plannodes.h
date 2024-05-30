@@ -65,6 +65,8 @@ typedef struct PlannedStmt
 
 	bool		parallelModeNeeded; /* parallel mode required to execute? */
 
+	bool		hasRowSecurity; /*DBMS: RLS flag*/
+
 	int			jitFlags;		/* which forms of JIT should be performed */
 
 	struct Plan *planTree;		/* tree of Plan nodes */
