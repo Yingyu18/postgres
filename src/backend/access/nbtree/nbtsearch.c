@@ -1773,11 +1773,33 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 					}
 				}
 			}
+
 			/* When !continuescan, there can't be any more matches, so stop */
-			if (!pstate.continuescan)
+			if (!pstate.continuescan){
+
+				/*DBMS: Stroe a item for RLS*/
+				if (scan->hasRowSecurity && pstate.firstmatch == false && !BTreeTupleIsPosting(itup))
+				{
+					/* Remember a item at next next space in the array */
+					_bt_saveitem(so, 0, offnum, itup);
+				}
+				/*DBMS*/
+
 				break;
+			}
 
 			offnum = OffsetNumberNext(offnum);
+			/*DBMS: Stroe a item for RLS*/
+			if (scan->hasRowSecurity && pstate.firstmatch == false && offnum > maxoff)
+				if (!BTreeTupleIsPosting(itup))
+				{
+					/* Remember a item at next next space in the array */
+					itemIndex++;
+					_bt_saveitem(so, 0, offnum, itup);
+					itemIndex--;
+				}
+			/*DBMS*/
+
 		}
 
 		/*
