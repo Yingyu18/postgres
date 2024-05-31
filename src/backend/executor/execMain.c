@@ -298,6 +298,12 @@ ExecutorRun(QueryDesc *queryDesc,
 			ScanDirection direction, uint64 count,
 			bool execute_once)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ExecutorRun] Start.\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
 	if (ExecutorRun_hook)
 		(*ExecutorRun_hook) (queryDesc, direction, count, execute_once);
 	else

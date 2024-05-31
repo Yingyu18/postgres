@@ -140,6 +140,12 @@ ProcessQuery(PlannedStmt *plan,
 			 DestReceiver *dest,
 			 QueryCompletion *qc)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ProcessQuery] Start nodeTag %s.\n", plan->type);
+		fflush(logfile);
+        fclose(logfile);
+    }
 	QueryDesc  *queryDesc;
 
 	/*
@@ -152,6 +158,7 @@ ProcessQuery(PlannedStmt *plan,
 	/*
 	 * Call ExecutorStart to prepare the plan for execution
 	 */
+
 	// queryDesc->PlannedStmt = PlannedStmt *plan 
 	ExecutorStart(queryDesc, 0);
 

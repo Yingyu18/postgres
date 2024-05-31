@@ -1,5 +1,5 @@
 
-ExecScan(&node->ss,
+ExecScan(&node->ss) // check that the current tuple satisfies the qual-clause
     IndexNext(IndexScanState *node)
     bool index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *slot))
         ItemPointerData tid = index_getnext_tid(IndexScanDesc scan, ScanDirection direction)

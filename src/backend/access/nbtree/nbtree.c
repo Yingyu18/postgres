@@ -207,14 +207,13 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 {
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	bool		res;
-    #ifdef DEBUG
+
     FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
     if (logfile != NULL) {
-        fprintf(logfile, "[_bt_next].\n");
+        fprintf(logfile, "[_btgettuple].\n");
 		fflush(logfile);
         fclose(logfile);
     }
-	#endif
 	/* btree indexes are never lossy */
 	scan->xs_recheck = false;
 

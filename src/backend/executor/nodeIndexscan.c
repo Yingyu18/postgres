@@ -79,6 +79,12 @@ static HeapTuple reorderqueue_pop(IndexScanState *node);
 static TupleTableSlot *
 IndexNext(IndexScanState *node)
 {
+    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[IndexNext]\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
 	EState	   *estate;
 	ExprContext *econtext;
 	ScanDirection direction;
@@ -521,6 +527,12 @@ reorderqueue_pop(IndexScanState *node)
 static TupleTableSlot *
 ExecIndexScan(PlanState *pstate)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ExecIndexScan]\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
 	IndexScanState *node = castNode(IndexScanState, pstate);
 
 	/*

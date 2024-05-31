@@ -680,13 +680,20 @@ index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *
 
 			/* Time to fetch the next TID from the index */
 			tid = index_getnext_tid(scan, direction);
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[index_getnetxt_slot] get a tid %p\n", (void *) tid); 
+				fflush(logfile);
+				fclose(logfile);
+			}
 
 			/* If we're out of index entries, we're done */
 			if (tid == NULL)
-				break;
+				break;	
 
 			Assert(ItemPointerEquals(tid, &scan->xs_heaptid));
 		}
+
 
 		/*
 		 * Fetch the next (or only) visible heap tuple for this index entry.
@@ -694,8 +701,15 @@ index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *
 		 * the index.
 		 */
 		Assert(ItemPointerIsValid(&scan->xs_heaptid));
-		if (index_fetch_heap(scan, slot))
+		if (index_fetch_heap(scan, slot)){
+		FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[index_getnetxt_slot] %s get a slot.\n", scan->hasRowSecurity? "RLS plan":"");
+				fflush(logfile);
+				fclose(logfile);
+			}
 			return true;
+		}
 	}
 
 	return false;

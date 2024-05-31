@@ -1571,6 +1571,12 @@ static bool
 _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 			 bool firstPage)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+	if (logfile != NULL) {
+		fprintf(logfile, "[_bt_readpage]: start \n");
+		fflush(logfile);
+		fclose(logfile);
+	}
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	Page		page;
 	BTPageOpaque opaque;
@@ -1705,6 +1711,12 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 
 	if (ScanDirectionIsForward(dir))
 	{
+		FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+		if (logfile != NULL) {
+			fprintf(logfile, "[_bt_readpage]:Forward scan\n");
+			fflush(logfile);
+			fclose(logfile);
+		}
 		/* SK_SEARCHARRAY forward scans must provide high key up front */
 		if (arrayKeys && !P_RIGHTMOST(opaque))
 		{
@@ -1757,6 +1769,13 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 
 			if (passes_quals)
 			{
+				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+				if (logfile != NULL) {
+					fprintf(logfile, "[_bt_readpage]: passes_quals save item\n");
+					fflush(logfile);
+					fclose(logfile);
+				}
+
 				/* tuple passes all scan key conditions */
 				pstate.firstmatch = true;
 				if (!BTreeTupleIsPosting(itup))
@@ -1793,8 +1812,14 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 			if (!pstate.continuescan){
 
 				/*DBMS: Stroe a item for RLS*/
-				if (scan->hasRowSecurity && pstate.firstmatch == false && !BTreeTupleIsPosting(itup))
+				if (scan->hasRowSecurity && pstate.firstmatch == false)
 				{
+					FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+					if (logfile != NULL) {
+						fprintf(logfile, "[_bt_readpage]: !continue save item\n");
+						fflush(logfile);
+						fclose(logfile);
+					}
 					/* Remember a item at next next space in the array */
 					_bt_saveitem(so, 0, offnum, itup);
 				}
@@ -1805,14 +1830,20 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 
 			offnum = OffsetNumberNext(offnum);
 			/*DBMS: Stroe a item for RLS*/
-			if (scan->hasRowSecurity && pstate.firstmatch == false && offnum > maxoff)
+			if (scan->hasRowSecurity && pstate.firstmatch == false && offnum > maxoff){
+				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+				if (logfile != NULL) {
+					fprintf(logfile, "[_bt_readpage]: offnum > maxoff save item\n");
+					fflush(logfile);
+					fclose(logfile);
+				}
 				if (!BTreeTupleIsPosting(itup))
 				{
 					/* Remember a item at next next space in the array */
-					itemIndex++;
+	
 					_bt_saveitem(so, 0, offnum, itup);
-					itemIndex--;
 				}
+			}
 			/*DBMS*/
 
 		}

@@ -157,6 +157,12 @@ ExecScan(ScanState *node,
 		 ExecScanAccessMtd accessMtd,	/* function returning a tuple */
 		 ExecScanRecheckMtd recheckMtd)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ExecScan]: NodeTag %d\n", node->ps.type);
+		fflush(logfile);
+        fclose(logfile);
+    }
 	ExprContext *econtext;
 	ExprState  *qual;
 	ProjectionInfo *projInfo;
@@ -204,6 +210,12 @@ ExecScan(ScanState *node,
 		 */
 		if (TupIsNull(slot))
 		{
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    		if (logfile != NULL) {
+        		fprintf(logfile, "[ExecScan]]: NULL slot \n");
+	            fflush(logfile);
+        		fclose(logfile);
+    		}
 			if (projInfo)
 				return ExecClearTuple(projInfo->pi_state.resultslot);
 			else
@@ -224,6 +236,12 @@ ExecScan(ScanState *node,
 		 */
 		if (qual == NULL || ExecQual(qual, econtext))
 		{
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    		if (logfile != NULL) {
+        		fprintf(logfile, "[ExecScan]: the current tuple satisfies the qual-clause \n");
+	            fflush(logfile);
+        		fclose(logfile);
+    		}
 			/*
 			 * Found a satisfactory scan tuple.
 			 */
@@ -243,8 +261,15 @@ ExecScan(ScanState *node,
 				return slot;
 			}
 		}
-		else
+		else{
 			InstrCountFiltered1(node, 1);
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    		if (logfile != NULL) {
+        		fprintf(logfile, "[ExecScan]: the current tuple not satisfies the qual-clause \n");
+	            fflush(logfile);
+        		fclose(logfile);
+    		}
+		}
 
 		/*
 		 * Tuple fails qual, so free per-tuple memory and try again.
