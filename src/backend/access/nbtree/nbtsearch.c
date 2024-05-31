@@ -891,6 +891,13 @@ _bt_first(IndexScanDesc scan, ScanDirection dir)
 	BTScanPosItem *currItem;
 	BlockNumber blkno;
 
+    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[_bt_first].\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
+
 	Assert(!BTScanPosIsValid(so->currPos));
 
 	pgstat_count_index_scan(rel);
@@ -1491,6 +1498,14 @@ readcomplete:
 bool
 _bt_next(IndexScanDesc scan, ScanDirection dir)
 {
+
+    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[_bt_next].\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
+
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	BTScanPosItem *currItem;
 

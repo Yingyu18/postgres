@@ -84,7 +84,9 @@ IndexNext(IndexScanState *node)
 	ScanDirection direction;
 	IndexScanDesc scandesc;
 	TupleTableSlot *slot;
+    // #ifdef DEBUG
 
+	// #endif
 	/*
 	 * extract necessary information from index scan node
 	 */

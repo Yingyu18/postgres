@@ -887,7 +887,12 @@ pg_plan_query(Query *querytree, const char *query_string, int cursorOptions,
 			  ParamListInfo boundParams)
 {
 	PlannedStmt *plan;
-
+    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[pg_plan_query].\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
 	/* Utility commands have no plans. */
 	if (querytree->commandType == CMD_UTILITY)
 		return NULL;

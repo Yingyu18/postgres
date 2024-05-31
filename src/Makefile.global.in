@@ -25,6 +25,11 @@ standard_always_targets = clean distclean
 
 .PHONY: $(standard_targets) maintainer-clean install-strip html man installcheck-parallel update-unicode
 
+# Conditional DEBUG flag
+ifdef DEBUG
+    CFLAGS += -DDEBUG
+endif
+
 # make `all' the default target
 all:
 
