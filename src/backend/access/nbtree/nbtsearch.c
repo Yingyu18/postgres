@@ -1807,7 +1807,7 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 			if (!pstate.continuescan){
 
 				/*DBMS: Stroe a item for RLS*/
-				if (scan->hasRowSecurity && pstate.firstmatch == false && !BTreeTupleIsPosting(itup))
+				if (firstPage && scan->hasRowSecurity && pstate.firstmatch == false && !BTreeTupleIsPosting(itup))
 				{
 					/* Remember a item at next next space in the array */
 					_bt_saveitem(so, 0, offnum, itup);
@@ -1826,7 +1826,7 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 
 			offnum = OffsetNumberNext(offnum);
 			/*DBMS: Stroe a item for RLS*/
-			if (scan->hasRowSecurity && pstate.firstmatch == false && offnum > maxoff && !BTreeTupleIsPosting(itup))
+			if (firstPage && scan->hasRowSecurity && pstate.firstmatch == false && offnum > maxoff && !BTreeTupleIsPosting(itup))
 			{
 					/* Remember a item at next next space in the array */
 					_bt_saveitem(so, 0, offnum, itup);

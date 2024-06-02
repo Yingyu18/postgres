@@ -270,6 +270,13 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 int64
 btgetbitmap(IndexScanDesc scan, TIDBitmap *tbm)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[btgetbitmap]\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
+
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	int64		ntids = 0;
 	ItemPointer heapTid;
