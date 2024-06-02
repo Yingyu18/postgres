@@ -224,8 +224,15 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 		 * the appropriate direction.  If we haven't done so yet, we call
 		 * _bt_first() to get the first item in the scan.
 		 */
-		if (!BTScanPosIsValid(so->currPos))
+		if (!BTScanPosIsValid(so->currPos)){
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[btgettuple] call _bt_first .\n");
+				fflush(logfile);
+				fclose(logfile);
+			}
 			res = _bt_first(scan, dir);
+		}
 		else
 		{
 			/*
@@ -260,7 +267,12 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 			break;
 		/* ... otherwise see if we need another primitive index scan */
 	} while (so->numArrayKeys && _bt_start_prim_scan(scan, dir));
-
+    logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[btgettuple] return %s.\n", res? "true": "false");
+		fflush(logfile);
+        fclose(logfile);
+    }
 	return res;
 }
 
