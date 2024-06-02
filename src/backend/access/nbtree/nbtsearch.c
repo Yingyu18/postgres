@@ -1462,8 +1462,21 @@ _bt_first(IndexScanDesc scan, ScanDirection dir)
 		 * the next page.  Return false if there's no matching data at all.
 		 */
 		_bt_unlockbuf(scan->indexRelation, so->currPos.buf);
-		if (!_bt_steppage(scan, dir))
+		if (!_bt_steppage(scan, dir)){
+			/*DBMS: non exist case, return false and save the last item*/
+			if (scan->hasRowSecurity){
+				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+				if (logfile != NULL) {
+					fprintf(logfile, "[_bt_first] !_bt_strppage save item and return false\n");
+					fflush(logfile);
+					fclose(logfile);
+				}
+				currItem = &so->currPos.items[so->currPos.itemIndex];
+				scan->xs_heaptid = currItem->heapTid;		
+			}
+			/*DBMS*/
 			return false;
+		}
 	}
 	else
 	{
