@@ -672,6 +672,13 @@ index_fetch_heap(IndexScanDesc scan, TupleTableSlot *slot)
 bool
 index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *slot)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[index_getnext_slot]\n");
+	fflush(logfile);
+        fclose(logfile);
+    }
+
 	for (;;)
 	{
 		if (!scan->xs_heap_continue)
@@ -680,6 +687,13 @@ index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *
 
 			/* Time to fetch the next TID from the index */
 			tid = index_getnext_tid(scan, direction);
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+				if (logfile != NULL) {
+					fprintf(logfile, "[index_getnext_slot] index_getnext_tid return tid %p\n", (void *) tid);
+					fflush(logfile);
+					fclose(logfile);
+				}
+
 
 			/* If we're out of index entries, we're done */
 			if (tid == NULL)

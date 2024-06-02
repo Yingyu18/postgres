@@ -70,3 +70,48 @@
 2024-06-02 10:59:17.165 CST [71033] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
 2024-06-02 10:59:17.168 CST [71036] LOG:  database system was shut down at 2024-06-02 10:59:14 CST
 2024-06-02 10:59:17.171 CST [71033] LOG:  database system is ready to accept connections
+2024-06-02 11:04:17.173 CST [71034] LOG:  checkpoint starting: time
+2024-06-02 11:04:17.176 CST [71034] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/11BCB110, redo lsn=0/11BCB0B8
+2024-06-02 11:09:06.534 CST [71033] LOG:  received fast shutdown request
+2024-06-02 11:09:06.534 CST [71033] LOG:  aborting any active transactions
+2024-06-02 11:09:06.534 CST [71248] FATAL:  terminating connection due to administrator command
+2024-06-02 11:09:06.536 CST [71033] LOG:  background worker "logical replication launcher" (PID 71039) exited with exit code 1
+2024-06-02 11:09:06.536 CST [71034] LOG:  shutting down
+2024-06-02 11:09:06.536 CST [71034] LOG:  checkpoint starting: shutdown immediate
+2024-06-02 11:09:06.538 CST [71034] LOG:  checkpoint complete: wrote 0 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/11BCB1C0, redo lsn=0/11BCB1C0
+2024-06-02 11:09:06.540 CST [71033] LOG:  database system is shut down
+2024-06-02 11:09:09.707 CST [82039] LOG:  starting PostgreSQL 17beta1 on aarch64-apple-darwin21.6.0, compiled by Apple clang version 14.0.0 (clang-1400.0.29.202), 64-bit
+2024-06-02 11:09:09.709 CST [82039] LOG:  listening on IPv6 address "::1", port 5432
+2024-06-02 11:09:09.709 CST [82039] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-06-02 11:09:09.710 CST [82039] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-06-02 11:09:09.714 CST [82048] LOG:  database system was shut down at 2024-06-02 11:09:06 CST
+2024-06-02 11:09:09.716 CST [82039] LOG:  database system is ready to accept connections
+2024-06-02 11:09:33.997 CST [82194] ERROR:  date/time field value out of range: "8699145520" at character 39
+2024-06-02 11:09:33.997 CST [82194] HINT:  Perhaps you need a different "datestyle" setting.
+2024-06-02 11:09:33.997 CST [82194] STATEMENT:  SELECT * FROM Patient WHERE ID_number='8699145520';
+2024-06-02 11:12:20.466 CST [82194] ERROR:  failed to find conversion function from character varying to date
+2024-06-02 11:12:20.466 CST [82194] STATEMENT:  SELECT * FROM Patient WHERE ID_number='8699145520';
+2024-06-02 11:13:57.618 CST [82039] LOG:  received fast shutdown request
+2024-06-02 11:13:57.618 CST [82039] LOG:  aborting any active transactions
+2024-06-02 11:13:57.618 CST [82194] FATAL:  terminating connection due to administrator command
+2024-06-02 11:13:57.619 CST [82039] LOG:  background worker "logical replication launcher" (PID 82051) exited with exit code 1
+2024-06-02 11:13:57.619 CST [82046] LOG:  shutting down
+2024-06-02 11:13:57.620 CST [82046] LOG:  checkpoint starting: shutdown immediate
+2024-06-02 11:13:57.622 CST [82046] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/11BCB270, redo lsn=0/11BCB270
+2024-06-02 11:13:57.623 CST [82039] LOG:  database system is shut down
+2024-06-02 11:14:00.195 CST [87923] LOG:  starting PostgreSQL 17beta1 on aarch64-apple-darwin21.6.0, compiled by Apple clang version 14.0.0 (clang-1400.0.29.202), 64-bit
+2024-06-02 11:14:00.197 CST [87923] LOG:  listening on IPv6 address "::1", port 5432
+2024-06-02 11:14:00.197 CST [87923] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-06-02 11:14:00.198 CST [87923] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-06-02 11:14:00.202 CST [87926] LOG:  database system was shut down at 2024-06-02 11:13:57 CST
+2024-06-02 11:14:00.205 CST [87923] LOG:  database system is ready to accept connections
+2024-06-02 11:19:00.206 CST [87924] LOG:  checkpoint starting: time
+2024-06-02 11:19:00.210 CST [87924] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.005 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/11BCB378, redo lsn=0/11BCB320
+2024-06-02 11:58:32.505 CST [87923] LOG:  received fast shutdown request
+2024-06-02 11:58:32.506 CST [87923] LOG:  aborting any active transactions
+2024-06-02 11:58:32.507 CST [87969] FATAL:  terminating connection due to administrator command
+2024-06-02 11:58:32.507 CST [87923] LOG:  background worker "logical replication launcher" (PID 87929) exited with exit code 1
+2024-06-02 11:58:32.508 CST [87924] LOG:  shutting down
+2024-06-02 11:58:32.508 CST [87924] LOG:  checkpoint starting: shutdown immediate
+2024-06-02 11:58:32.511 CST [87924] LOG:  checkpoint complete: wrote 0 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/11BCB428, redo lsn=0/11BCB428
+2024-06-02 11:58:32.513 CST [87923] LOG:  database system is shut down
