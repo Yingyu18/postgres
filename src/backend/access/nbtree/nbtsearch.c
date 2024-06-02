@@ -1578,6 +1578,13 @@ static bool
 _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 			 bool firstPage)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[_bt_readpage] first page? %s\n", firstPage ? "true" : "false");
+		fflush(logfile);
+        fclose(logfile);
+    }
+
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	Page		page;
 	BTPageOpaque opaque;
@@ -1986,7 +1993,7 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 		so->currPos.lastItem = MaxTIDsPerBTreePage - 1;
 		so->currPos.itemIndex = MaxTIDsPerBTreePage - 1;
 	}
-    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
     if (logfile != NULL) {
         fprintf(logfile, "[_bt_readpage] return %s\n", so->currPos.firstItem <= so->currPos.lastItem? "true" : "false");
 		fflush(logfile);
