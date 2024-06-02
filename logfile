@@ -1,0 +1,72 @@
+2024-06-02 09:38:43.934 CST [27968] LOG:  starting PostgreSQL 17beta1 on aarch64-apple-darwin21.6.0, compiled by Apple clang version 14.0.0 (clang-1400.0.29.202), 64-bit
+2024-06-02 09:38:43.935 CST [27968] LOG:  listening on IPv6 address "::1", port 5432
+2024-06-02 09:38:43.935 CST [27968] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-06-02 09:38:43.936 CST [27968] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-06-02 09:38:43.938 CST [27971] LOG:  database system was shut down at 2024-06-02 09:38:26 CST
+2024-06-02 09:38:43.941 CST [27968] LOG:  database system is ready to accept connections
+2024-06-02 09:38:48.347 CST [27968] LOG:  received fast shutdown request
+2024-06-02 09:38:48.347 CST [27968] LOG:  aborting any active transactions
+2024-06-02 09:38:48.347 CST [27968] LOG:  background worker "logical replication launcher" (PID 27974) exited with exit code 1
+2024-06-02 09:38:48.347 CST [27969] LOG:  shutting down
+2024-06-02 09:38:48.347 CST [27969] LOG:  checkpoint starting: shutdown immediate
+2024-06-02 09:38:48.349 CST [27969] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1492B28, redo lsn=0/1492B28
+2024-06-02 09:38:48.351 CST [27968] LOG:  database system is shut down
+2024-06-02 10:26:25.647 CST [43382] LOG:  starting PostgreSQL 17beta1 on aarch64-apple-darwin21.6.0, compiled by Apple clang version 14.0.0 (clang-1400.0.29.202), 64-bit
+2024-06-02 10:26:25.649 CST [43382] LOG:  listening on IPv6 address "::1", port 5432
+2024-06-02 10:26:25.649 CST [43382] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-06-02 10:26:25.649 CST [43382] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-06-02 10:26:25.653 CST [43385] LOG:  database system was shut down at 2024-06-02 09:38:48 CST
+2024-06-02 10:26:25.656 CST [43382] LOG:  database system is ready to accept connections
+2024-06-02 10:31:25.708 CST [43383] LOG:  checkpoint starting: time
+2024-06-02 10:33:22.348 CST [47774] FATAL:  lock file "postmaster.pid" already exists
+2024-06-02 10:33:22.348 CST [47774] HINT:  Is another postmaster (PID 43382) running in data directory "/Users/yingyuliu/Desktop/pgsql/data"?
+2024-06-02 10:34:21.722 CST [43382] LOG:  received fast shutdown request
+2024-06-02 10:34:21.722 CST [43382] LOG:  aborting any active transactions
+2024-06-02 10:34:21.723 CST [46370] FATAL:  terminating connection due to administrator command
+2024-06-02 10:34:21.723 CST [46369] FATAL:  terminating connection due to administrator command
+2024-06-02 10:34:21.723 CST [43382] LOG:  background worker "logical replication launcher" (PID 43388) exited with exit code 1
+2024-06-02 10:34:21.878 CST [43383] LOG:  checkpoint complete: wrote 10579 buffers (64.6%); 0 WAL file(s) added, 0 removed, 16 recycled; write=176.160 s, sync=0.005 s, total=176.171 s; sync files=328, longest=0.002 s, average=0.001 s; distance=269532 kB, estimate=269532 kB; lsn=0/11BC9F58, redo lsn=0/11BC9EC8
+2024-06-02 10:34:21.879 CST [43383] LOG:  shutting down
+2024-06-02 10:34:21.879 CST [43383] LOG:  checkpoint starting: shutdown immediate
+2024-06-02 10:34:21.880 CST [43383] LOG:  checkpoint complete: wrote 0 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=242579 kB; lsn=0/11BC9FD0, redo lsn=0/11BC9FD0
+2024-06-02 10:34:21.884 CST [43382] LOG:  database system is shut down
+2024-06-02 10:39:38.399 CST [51665] LOG:  starting PostgreSQL 17beta1 on aarch64-apple-darwin21.6.0, compiled by Apple clang version 14.0.0 (clang-1400.0.29.202), 64-bit
+2024-06-02 10:39:38.401 CST [51665] LOG:  listening on IPv6 address "::1", port 5432
+2024-06-02 10:39:38.401 CST [51665] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-06-02 10:39:38.401 CST [51665] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-06-02 10:39:38.406 CST [51668] LOG:  database system was shut down at 2024-06-02 10:34:21 CST
+2024-06-02 10:39:38.409 CST [51665] LOG:  database system is ready to accept connections
+2024-06-02 10:39:50.565 CST [51787] FATAL:  role "lily488302" does not exist
+2024-06-02 10:42:59.045 CST [51665] LOG:  received fast shutdown request
+2024-06-02 10:42:59.045 CST [51665] LOG:  aborting any active transactions
+2024-06-02 10:42:59.046 CST [52240] FATAL:  terminating connection due to administrator command
+2024-06-02 10:42:59.046 CST [52123] FATAL:  terminating connection due to administrator command
+2024-06-02 10:42:59.046 CST [51665] LOG:  background worker "logical replication launcher" (PID 51671) exited with exit code 1
+2024-06-02 10:42:59.047 CST [51666] LOG:  shutting down
+2024-06-02 10:42:59.047 CST [51666] LOG:  checkpoint starting: shutdown immediate
+2024-06-02 10:42:59.049 CST [51666] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=5, longest=0.001 s, average=0.001 s; distance=3 kB, estimate=3 kB; lsn=0/11BCAE50, redo lsn=0/11BCAE50
+2024-06-02 10:42:59.051 CST [51665] LOG:  database system is shut down
+2024-06-02 10:43:21.338 CST [54747] LOG:  starting PostgreSQL 17beta1 on aarch64-apple-darwin21.6.0, compiled by Apple clang version 14.0.0 (clang-1400.0.29.202), 64-bit
+2024-06-02 10:43:21.340 CST [54747] LOG:  listening on IPv6 address "::1", port 5432
+2024-06-02 10:43:21.340 CST [54747] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-06-02 10:43:21.340 CST [54747] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-06-02 10:43:21.343 CST [54750] LOG:  database system was shut down at 2024-06-02 10:42:59 CST
+2024-06-02 10:43:21.349 CST [54747] LOG:  database system is ready to accept connections
+2024-06-02 10:48:21.341 CST [54748] LOG:  checkpoint starting: time
+2024-06-02 10:48:21.343 CST [54748] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/11BCAF58, redo lsn=0/11BCAF00
+2024-06-02 10:59:09.738 CST [70853] FATAL:  lock file "postmaster.pid" already exists
+2024-06-02 10:59:09.738 CST [70853] HINT:  Is another postmaster (PID 54747) running in data directory "/Users/yingyuliu/Desktop/pgsql/data"?
+2024-06-02 10:59:14.269 CST [54747] LOG:  received fast shutdown request
+2024-06-02 10:59:14.270 CST [54747] LOG:  aborting any active transactions
+2024-06-02 10:59:14.270 CST [54768] FATAL:  terminating connection due to administrator command
+2024-06-02 10:59:14.270 CST [54747] LOG:  background worker "logical replication launcher" (PID 54753) exited with exit code 1
+2024-06-02 10:59:14.271 CST [54748] LOG:  shutting down
+2024-06-02 10:59:14.271 CST [54748] LOG:  checkpoint starting: shutdown immediate
+2024-06-02 10:59:14.272 CST [54748] LOG:  checkpoint complete: wrote 0 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/11BCB008, redo lsn=0/11BCB008
+2024-06-02 10:59:14.274 CST [54747] LOG:  database system is shut down
+2024-06-02 10:59:17.162 CST [71033] LOG:  starting PostgreSQL 17beta1 on aarch64-apple-darwin21.6.0, compiled by Apple clang version 14.0.0 (clang-1400.0.29.202), 64-bit
+2024-06-02 10:59:17.165 CST [71033] LOG:  listening on IPv6 address "::1", port 5432
+2024-06-02 10:59:17.165 CST [71033] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-06-02 10:59:17.165 CST [71033] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-06-02 10:59:17.168 CST [71036] LOG:  database system was shut down at 2024-06-02 10:59:14 CST
+2024-06-02 10:59:17.171 CST [71033] LOG:  database system is ready to accept connections

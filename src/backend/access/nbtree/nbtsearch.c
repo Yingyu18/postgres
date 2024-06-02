@@ -1478,6 +1478,13 @@ readcomplete:
 	if (scan->xs_want_itup)
 		scan->xs_itup = (IndexTuple) (so->currTuples + currItem->tupleOffset);
 
+    logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[_bt_first]return true\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
+
 	return true;
 }
 

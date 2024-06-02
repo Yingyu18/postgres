@@ -1,6 +1,6 @@
 diff -U3 /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/create_index.out /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/create_index.out
 --- /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/create_index.out	2024-05-30 17:06:51.000000000 +0800
-+++ /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/create_index.out	2024-05-31 12:00:19.000000000 +0800
++++ /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/create_index.out	2024-06-02 09:47:49.000000000 +0800
 @@ -1954,7 +1954,7 @@
  ORDER BY thousand;
   thousand | tenthous 
@@ -10,34 +10,34 @@ diff -U3 /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/create_
          1 |     1001
  (2 rows)
  
-diff -U3 /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/vacuum_parallel.out /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/vacuum_parallel.out
---- /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/vacuum_parallel.out	2024-05-30 17:06:51.000000000 +0800
-+++ /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/vacuum_parallel.out	2024-05-31 12:00:31.000000000 +0800
-@@ -34,7 +34,7 @@
-   pg_size_bytes(current_setting('min_parallel_index_scan_size'));
-  trigger_parallel_vacuum_nindexes 
- ----------------------------------
--                                2
-+                                1
- (1 row)
+diff -U3 /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/triggers.out /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/triggers.out
+--- /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/triggers.out	2024-05-30 17:06:51.000000000 +0800
++++ /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/triggers.out	2024-06-02 09:47:55.000000000 +0800
+@@ -2968,19 +2968,13 @@
+   ORDER BY trigger_name COLLATE "C", 2;
+     trigger_name    | event_manipulation | event_object_schema | event_object_table | action_order | action_condition | action_orientation | action_timing | action_reference_old_table | action_reference_new_table 
+ --------------------+--------------------+---------------------+--------------------+--------------+------------------+--------------------+---------------+----------------------------+----------------------------
+- child1_delete_trig | DELETE             | public              | child1             |            1 |                  | STATEMENT          | AFTER         | old_table                  | 
+- child1_insert_trig | INSERT             | public              | child1             |            1 |                  | STATEMENT          | AFTER         |                            | new_table
+- child1_update_trig | UPDATE             | public              | child1             |            1 |                  | STATEMENT          | AFTER         | old_table                  | new_table
+  child2_delete_trig | DELETE             | public              | child2             |            1 |                  | STATEMENT          | AFTER         | old_table                  | 
+  child2_insert_trig | INSERT             | public              | child2             |            1 |                  | STATEMENT          | AFTER         |                            | new_table
+  child2_update_trig | UPDATE             | public              | child2             |            1 |                  | STATEMENT          | AFTER         | old_table                  | new_table
+  child3_delete_trig | DELETE             | public              | child3             |            1 |                  | STATEMENT          | AFTER         | old_table                  | 
+  child3_insert_trig | INSERT             | public              | child3             |            1 |                  | STATEMENT          | AFTER         |                            | new_table
+  child3_update_trig | UPDATE             | public              | child3             |            1 |                  | STATEMENT          | AFTER         | old_table                  | new_table
+- parent_delete_trig | DELETE             | public              | parent             |            1 |                  | STATEMENT          | AFTER         | old_table                  | 
+- parent_insert_trig | INSERT             | public              | parent             |            1 |                  | STATEMENT          | AFTER         |                            | new_table
+- parent_update_trig | UPDATE             | public              | parent             |            1 |                  | STATEMENT          | AFTER         | old_table                  | new_table
+-(12 rows)
++(6 rows)
  
- -- Parallel VACUUM with B-Tree page deletions, ambulkdelete calls:
+ -- insert directly into children sees respective child-format tuples
+ insert into child1 values ('AAA', 42);
 diff -U3 /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/domain.out /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/domain.out
 --- /Users/yingyuliu/Desktop/postgres0530/src/test/regress/expected/domain.out	2024-05-30 17:06:51.000000000 +0800
-+++ /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/domain.out	2024-05-31 12:00:34.000000000 +0800
-@@ -1290,10 +1290,8 @@
-   ORDER BY domain_name;
-  domain_catalog | domain_schema | domain_name | table_catalog | table_schema | table_name | column_name 
- ----------------+---------------+-------------+---------------+--------------+------------+-------------
-- regression     | public        | con         | regression    | public       | domcontest | col1
-  regression     | public        | dom         | regression    | public       | domview    | col1
-- regression     | public        | things      | regression    | public       | thethings  | stuff
--(3 rows)
-+(1 row)
- 
- SELECT * FROM information_schema.domain_constraints
-   WHERE domain_name IN ('con', 'dom', 'pos_int', 'things')
-@@ -1311,11 +1309,8 @@
++++ /Users/yingyuliu/Desktop/postgres0530/src/test/regress/results/domain.out	2024-06-02 09:48:46.000000000 +0800
+@@ -1311,11 +1311,8 @@
    ORDER BY domain_name;
   domain_catalog | domain_schema | domain_name | data_type | character_maximum_length | character_octet_length | character_set_catalog | character_set_schema | character_set_name | collation_catalog | collation_schema | collation_name | numeric_precision | numeric_precision_radix | numeric_scale | datetime_precision | interval_type | interval_precision | domain_default | udt_catalog | udt_schema | udt_name | scope_catalog | scope_schema | scope_name | maximum_cardinality | dtd_identifier 
  ----------------+---------------+-------------+-----------+--------------------------+------------------------+-----------------------+----------------------+--------------------+-------------------+------------------+----------------+-------------------+-------------------------+---------------+--------------------+---------------+--------------------+----------------+-------------+------------+----------+---------------+--------------+------------+---------------------+----------------

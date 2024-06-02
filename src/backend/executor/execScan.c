@@ -160,7 +160,14 @@ ExecScan(ScanState *node,
 	ExprContext *econtext;
 	ExprState  *qual;
 	ProjectionInfo *projInfo;
-
+    
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ExecScan] nodeTag: %d\n", node->ps.type);
+		fflush(logfile);
+        fclose(logfile);
+    }
+	
 	/*
 	 * Fetch data from node
 	 */
