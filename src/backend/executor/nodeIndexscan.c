@@ -81,8 +81,8 @@ IndexNext(IndexScanState *node)
 {
     FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
     if (logfile != NULL) {
-    fprintf(logfile, "[IndexNext]\n");
-	fflush(logfile);
+		fprintf(logfile, "[IndexNext]\n");
+		fflush(logfile);
         fclose(logfile);
     }
 
@@ -144,6 +144,18 @@ IndexNext(IndexScanState *node)
 	while (index_getnext_slot(scandesc, direction, slot))
 	{
 		CHECK_FOR_INTERRUPTS();
+		
+		/*DBMS*/
+		if(node->ss.ps.hasRowSecurity){
+			logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[IndexNext] skip tuple recheck and return slot\n");
+				fflush(logfile);
+				fclose(logfile);
+			}
+			return slot;
+		}
+		/*DBMS*/
 
 		/*
 		 * If the index was lossy, we have to recheck the index quals using

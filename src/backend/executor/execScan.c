@@ -35,6 +35,12 @@ ExecScanFetch(ScanState *node,
 			  ExecScanAccessMtd accessMtd,
 			  ExecScanRecheckMtd recheckMtd)
 {
+    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ExecScanFetch]\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
 	EState	   *estate = node->ps.state;
 
 	CHECK_FOR_INTERRUPTS();
@@ -167,7 +173,7 @@ ExecScan(ScanState *node,
 		fflush(logfile);
         fclose(logfile);
     }
-	
+
 	/*
 	 * Fetch data from node
 	 */
@@ -186,6 +192,7 @@ ExecScan(ScanState *node,
 		ResetExprContext(econtext);
 		return ExecScanFetch(node, accessMtd, recheckMtd);
 	}
+
 
 	/*
 	 * Reset per-tuple memory context to free any expression evaluation
@@ -216,6 +223,19 @@ ExecScan(ScanState *node,
 			else
 				return slot;
 		}
+		
+		/*DBMS: test*/
+		if (node->ps.hasRowSecurity){
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[ExecScan] RLS return whatever slot\n");
+				fflush(logfile);
+				fclose(logfile);
+			}
+			return slot;
+		
+		}
+		/*DBMS: test*/
 
 		/*
 		 * place the current tuple into the expr context
@@ -229,6 +249,12 @@ ExecScan(ScanState *node,
 		 * when the qual is null ... saves only a few cycles, but they add up
 		 * ...
 		 */
+		FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+		if (logfile != NULL) {
+			fprintf(logfile, "[ExecScan] ready to ExecQual\n");
+			fflush(logfile);
+			fclose(logfile);
+		}
 		if (qual == NULL || ExecQual(qual, econtext))
 		{
 			/*
@@ -250,8 +276,20 @@ ExecScan(ScanState *node,
 				return slot;
 			}
 		}
-		else
+		else{
+			/*DBMS*/
+			if(node->ps.hasRowSecurity){
+				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+				if (logfile != NULL) {
+					fprintf(logfile, "[ExecScan] RLS done, return empty slot\n");
+					fflush(logfile);
+					fclose(logfile);
+				}
+				return ExecClearTuple(slot);
+			}
+			/*DBMS*/
 			InstrCountFiltered1(node, 1);
+		}
 
 		/*
 		 * Tuple fails qual, so free per-tuple memory and try again.

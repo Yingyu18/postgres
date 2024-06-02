@@ -412,8 +412,16 @@ ExecProject(ProjectionInfo *projInfo)
 static inline bool
 ExecQual(ExprState *state, ExprContext *econtext)
 {
+
 	Datum		ret;
 	bool		isnull;
+
+    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ExeQual]\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
 
 	/* short-circuit (here and in ExecInitQual) for empty restriction list */
 	if (state == NULL)
