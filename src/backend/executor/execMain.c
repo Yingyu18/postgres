@@ -1648,18 +1648,18 @@ ExecutePlan(EState *estate,
 
 		/* Reset the per-output-tuple exprcontext */
 		ResetPerTupleExprContext(estate);
-
-		/*
-		 * Execute the plan and obtain a tuple
-		 */
-		slot = ExecProcNode(planstate);
-
 		FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
 		if (logfile != NULL) {
 			fprintf(logfile, "[ExecuetePlan] for loop \n");
 			fflush(logfile);
 			fclose(logfile);
 		}
+		/*
+		 * Execute the plan and obtain a tuple
+		 */
+		slot = ExecProcNode(planstate);
+
+
 		/*
 		 * if the tuple is null, then we assume there is nothing more to
 		 * process so we just end the loop...
@@ -1679,6 +1679,7 @@ ExecutePlan(EState *estate,
 			break;
 		}
 		/*DBMS*/
+
 		/*
 		 * If we have a junk filter, then project a new tuple with the junk
 		 * removed.
@@ -1689,6 +1690,7 @@ ExecutePlan(EState *estate,
 		 */
 		if (estate->es_junkFilter != NULL)
 			slot = ExecFilterJunk(estate->es_junkFilter, slot);
+
 
 		/*
 		 * If we are supposed to send the tuple somewhere, do so. (In

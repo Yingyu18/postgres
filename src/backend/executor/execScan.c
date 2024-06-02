@@ -223,19 +223,19 @@ ExecScan(ScanState *node,
 			else
 				return slot;
 		}
+
+		// /*DBMS: test*/
+		// if (node->ps.hasRowSecurity){
+		// 	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+		// 	if (logfile != NULL) {
+		// 		fprintf(logfile, "[ExecScan] RLS return whatever slot\n");
+		// 		fflush(logfile);
+		// 		fclose(logfile);
+		// 	}
+		// 	return slot;
 		
-		/*DBMS: test*/
-		if (node->ps.hasRowSecurity){
-			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-			if (logfile != NULL) {
-				fprintf(logfile, "[ExecScan] RLS return whatever slot\n");
-				fflush(logfile);
-				fclose(logfile);
-			}
-			return slot;
-		
-		}
-		/*DBMS: test*/
+		// }
+		// /*DBMS: test*/
 
 		/*
 		 * place the current tuple into the expr context
@@ -257,6 +257,13 @@ ExecScan(ScanState *node,
 		}
 		if (qual == NULL || ExecQual(qual, econtext))
 		{
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+				if (logfile != NULL) {
+					fprintf(logfile, "[ExecScan] %s\n", qual==NULL?"qual is NULL":"pass qual");
+					fflush(logfile);
+					fclose(logfile);
+				}
+
 			/*
 			 * Found a satisfactory scan tuple.
 			 */

@@ -207,12 +207,12 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 {
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	bool		res;
-    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[btgettuple].\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
+    // FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[btgettuple].\n");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 	/* btree indexes are never lossy */
 	scan->xs_recheck = false;
 
@@ -267,12 +267,12 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 			break;
 		/* ... otherwise see if we need another primitive index scan */
 	} while (so->numArrayKeys && _bt_start_prim_scan(scan, dir));
-    logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[btgettuple] return %s.\n", res? "true": "false");
-		fflush(logfile);
-        fclose(logfile);
-    }
+    // logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[btgettuple] return %s.\n", res? "true": "false");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 	return res;
 }
 

@@ -1467,7 +1467,7 @@ _bt_first(IndexScanDesc scan, ScanDirection dir)
 			if (scan->hasRowSecurity){
 				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
 				if (logfile != NULL) {
-					fprintf(logfile, "[_bt_first] !_bt_strppage save item and return false\n");
+					fprintf(logfile, "[_bt_first] !_bt_steppage save item and return false\n");
 					fflush(logfile);
 					fclose(logfile);
 				}
@@ -1491,12 +1491,12 @@ readcomplete:
 	if (scan->xs_want_itup)
 		scan->xs_itup = (IndexTuple) (so->currTuples + currItem->tupleOffset);
 
-    logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[_bt_first]return true\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
+    // logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[_bt_first]return true\n");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 
 	return true;
 }
@@ -1591,12 +1591,12 @@ static bool
 _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 			 bool firstPage)
 {
-	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[_bt_readpage] first page? %s\n", firstPage ? "true" : "false");
-		fflush(logfile);
-        fclose(logfile);
-    }
+	// FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[_bt_readpage] first page? %s\n", firstPage ? "true" : "false");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	Page		page;
@@ -2006,12 +2006,12 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 		so->currPos.lastItem = MaxTIDsPerBTreePage - 1;
 		so->currPos.itemIndex = MaxTIDsPerBTreePage - 1;
 	}
-    logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[_bt_readpage] return %s\n", so->currPos.firstItem <= so->currPos.lastItem? "true" : "false");
-		fflush(logfile);
-        fclose(logfile);
-    }
+    // logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[_bt_readpage] return %s\n", so->currPos.firstItem <= so->currPos.lastItem? "true" : "false");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 	return (so->currPos.firstItem <= so->currPos.lastItem);
 }
 

@@ -544,6 +544,12 @@ reorderqueue_pop(IndexScanState *node)
 static TupleTableSlot *
 ExecIndexScan(PlanState *pstate)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+	if (logfile != NULL) {
+		fprintf(logfile, "[ExecIndexScan]\n");
+		fflush(logfile);
+		fclose(logfile);
+	}
 	IndexScanState *node = castNode(IndexScanState, pstate);
 
 	/*
