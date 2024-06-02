@@ -137,6 +137,10 @@ IndexNext(IndexScanState *node)
 	/*
 	 * ok, now that we have what we need, fetch the next tuple.
 	 */
+	/*DBMS*/
+	if (node->ss.ps.hasRowSecurity)
+		scandesc->callbyIndexNext = true;
+	/*DBMS*/
 	while (index_getnext_slot(scandesc, direction, slot))
 	{
 		CHECK_FOR_INTERRUPTS();

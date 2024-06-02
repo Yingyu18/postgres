@@ -124,6 +124,7 @@ typedef struct IndexScanDescData
 	bool		xs_want_itup;	/* caller requests index tuples */
 	bool		xs_temp_snap;	/* unregister snapshot at scan end? */
 	bool        hasRowSecurity; /*DBMS: RLS flag*/
+	bool        callbyIndexNext; /*DBMS: flag for caller IndexNext*/
 
 
 	/* signaling to index AM about killing index tuples */

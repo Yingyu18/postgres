@@ -674,8 +674,8 @@ index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *
 {
 	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
     if (logfile != NULL) {
-        fprintf(logfile, "[index_getnext_slot]\n");
-	fflush(logfile);
+        fprintf(logfile, "[index_getnext_slot] %s\n", scan->callbyIndexNext? "IndexNext": "");
+		fflush(logfile);
         fclose(logfile);
     }
 
