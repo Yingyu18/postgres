@@ -35,6 +35,12 @@ ExecScanFetch(ScanState *node,
 			  ExecScanAccessMtd accessMtd,
 			  ExecScanRecheckMtd recheckMtd)
 {
+    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ExecScanFetch]\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
 	EState	   *estate = node->ps.state;
 
 	CHECK_FOR_INTERRUPTS();
@@ -166,6 +172,13 @@ ExecScan(ScanState *node,
 	ExprContext *econtext;
 	ExprState  *qual;
 	ProjectionInfo *projInfo;
+    
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[ExecScan] nodeTag: %d\n", node->ps.type);
+		fflush(logfile);
+        fclose(logfile);
+    }
 
 	/*
 	 * Fetch data from node
@@ -185,6 +198,7 @@ ExecScan(ScanState *node,
 		ResetExprContext(econtext);
 		return ExecScanFetch(node, accessMtd, recheckMtd);
 	}
+
 
 	/*
 	 * Reset per-tuple memory context to free any expression evaluation
@@ -222,6 +236,19 @@ ExecScan(ScanState *node,
 				return slot;
 		}
 
+		// /*DBMS: test*/
+		// if (node->ps.hasRowSecurity){
+		// 	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+		// 	if (logfile != NULL) {
+		// 		fprintf(logfile, "[ExecScan] RLS return whatever slot\n");
+		// 		fflush(logfile);
+		// 		fclose(logfile);
+		// 	}
+		// 	return slot;
+		
+		// }
+		// /*DBMS: test*/
+
 		/*
 		 * place the current tuple into the expr context
 		 */
@@ -234,14 +261,21 @@ ExecScan(ScanState *node,
 		 * when the qual is null ... saves only a few cycles, but they add up
 		 * ...
 		 */
+		FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+		if (logfile != NULL) {
+			fprintf(logfile, "[ExecScan] ready to ExecQual\n");
+			fflush(logfile);
+			fclose(logfile);
+		}
 		if (qual == NULL || ExecQual(qual, econtext))
 		{
 			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    		if (logfile != NULL) {
-        		fprintf(logfile, "[ExecScan]: the current tuple satisfies the qual-clause \n");
-	            fflush(logfile);
-        		fclose(logfile);
-    		}
+				if (logfile != NULL) {
+					fprintf(logfile, "[ExecScan] %s\n", qual==NULL?"qual is NULL":"pass qual");
+					fflush(logfile);
+					fclose(logfile);
+				}
+
 			/*
 			 * Found a satisfactory scan tuple.
 			 */
@@ -262,13 +296,18 @@ ExecScan(ScanState *node,
 			}
 		}
 		else{
+			/*DBMS*/
+			if(node->ps.hasRowSecurity){
+				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+				if (logfile != NULL) {
+					fprintf(logfile, "[ExecScan] RLS done, return empty slot\n");
+					fflush(logfile);
+					fclose(logfile);
+				}
+				return ExecClearTuple(slot);
+			}
+			/*DBMS*/
 			InstrCountFiltered1(node, 1);
-			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    		if (logfile != NULL) {
-        		fprintf(logfile, "[ExecScan]: the current tuple not satisfies the qual-clause \n");
-	            fflush(logfile);
-        		fclose(logfile);
-    		}
 		}
 
 		/*

@@ -1616,6 +1616,12 @@ ExecutePlan(EState *estate,
 			DestReceiver *dest,
 			bool execute_once)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+	if (logfile != NULL) {
+		fprintf(logfile, "[ExecuetePlan]\n");
+		fflush(logfile);
+		fclose(logfile);
+	}
 	TupleTableSlot *slot;
 	uint64		current_tuple_count;
 
@@ -1645,13 +1651,20 @@ ExecutePlan(EState *estate,
 	 */
 	for (;;)
 	{
+
 		/* Reset the per-output-tuple exprcontext */
 		ResetPerTupleExprContext(estate);
-
+		FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+		if (logfile != NULL) {
+			fprintf(logfile, "[ExecuetePlan] for loop \n");
+			fflush(logfile);
+			fclose(logfile);
+		}
 		/*
 		 * Execute the plan and obtain a tuple
 		 */
 		slot = ExecProcNode(planstate);
+
 
 		/*
 		 * if the tuple is null, then we assume there is nothing more to
@@ -1659,6 +1672,19 @@ ExecutePlan(EState *estate,
 		 */
 		if (TupIsNull(slot))
 			break;
+
+		/*DBMS*/
+		if(planstate->hasRowSecurity){
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[ExecuetePlan]RLS send whatever Tuple  \n");
+				fflush(logfile);
+				fclose(logfile);
+			}
+			dest->receiveSlot(slot, dest);
+			break;
+		}
+		/*DBMS*/
 
 		/*
 		 * If we have a junk filter, then project a new tuple with the junk
@@ -1670,6 +1696,7 @@ ExecutePlan(EState *estate,
 		 */
 		if (estate->es_junkFilter != NULL)
 			slot = ExecFilterJunk(estate->es_junkFilter, slot);
+
 
 		/*
 		 * If we are supposed to send the tuple somewhere, do so. (In

@@ -79,12 +79,6 @@ static HeapTuple reorderqueue_pop(IndexScanState *node);
 static TupleTableSlot *
 IndexNext(IndexScanState *node)
 {
-    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[IndexNext]\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
 	EState	   *estate;
 	ExprContext *econtext;
 	ScanDirection direction;
@@ -136,9 +130,25 @@ IndexNext(IndexScanState *node)
 	/*
 	 * ok, now that we have what we need, fetch the next tuple.
 	 */
+	/*DBMS*/
+	if (node->ss.ps.hasRowSecurity)
+		scandesc->callbyIndexNext = true;
+	/*DBMS*/
 	while (index_getnext_slot(scandesc, direction, slot))
 	{
 		CHECK_FOR_INTERRUPTS();
+		
+		/*DBMS*/
+		if(node->ss.ps.hasRowSecurity){
+			logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[IndexNext] skip tuple recheck and return slot\n");
+				fflush(logfile);
+				fclose(logfile);
+			}
+			return slot;
+		}
+		/*DBMS*/
 
 		/*
 		 * If the index was lossy, we have to recheck the index quals using
@@ -527,12 +537,6 @@ reorderqueue_pop(IndexScanState *node)
 static TupleTableSlot *
 ExecIndexScan(PlanState *pstate)
 {
-	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[ExecIndexScan]\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
 	IndexScanState *node = castNode(IndexScanState, pstate);
 
 	/*

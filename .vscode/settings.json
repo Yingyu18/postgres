@@ -1,6 +1,5 @@
 {
     "files.associations": {
-        "__node_handle": "c",
-        "nodetags.h": "c"
+        "__node_handle": "c"
     }
 }

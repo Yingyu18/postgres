@@ -596,6 +596,15 @@ index_getnext_tid(IndexScanDesc scan, ScanDirection direction)
 	/* If we're out of index entries, we're done */
 	if (!found)
 	{
+		if (scan->callbyIndexNext && scan->hasRowSecurity){
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[index_getnetxt_slot] return tid for RLS.\n");
+				fflush(logfile);
+				fclose(logfile);
+			}
+			return &scan->xs_heaptid;
+		}
 		/* release resources (like buffer pins) from table accesses */
 		if (scan->xs_heapfetch)
 			table_index_fetch_reset(scan->xs_heapfetch);
@@ -672,6 +681,13 @@ index_fetch_heap(IndexScanDesc scan, TupleTableSlot *slot)
 bool
 index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *slot)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[index_getnext_slot] %s\n", scan->callbyIndexNext==true? "IndexNext": "");
+		fflush(logfile);
+        fclose(logfile);
+    }
+
 	for (;;)
 	{
 		if (!scan->xs_heap_continue)
@@ -680,12 +696,6 @@ index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *
 
 			/* Time to fetch the next TID from the index */
 			tid = index_getnext_tid(scan, direction);
-			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-			if (logfile != NULL) {
-				fprintf(logfile, "[index_getnetxt_slot] get a tid %p\n", (void *) tid); 
-				fflush(logfile);
-				fclose(logfile);
-			}
 
 			/* If we're out of index entries, we're done */
 			if (tid == NULL)
@@ -701,15 +711,8 @@ index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *
 		 * the index.
 		 */
 		Assert(ItemPointerIsValid(&scan->xs_heaptid));
-		if (index_fetch_heap(scan, slot)){
-		FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-			if (logfile != NULL) {
-				fprintf(logfile, "[index_getnetxt_slot] %s get a slot.\n", scan->hasRowSecurity? "RLS plan":"");
-				fflush(logfile);
-				fclose(logfile);
-			}
+		if (index_fetch_heap(scan, slot))
 			return true;
-		}
 	}
 
 	return false;

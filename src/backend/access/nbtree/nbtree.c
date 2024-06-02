@@ -207,13 +207,14 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 {
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	bool		res;
-
+    #ifdef DEBUG
     FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
     if (logfile != NULL) {
-        fprintf(logfile, "[_btgettuple].\n");
+        fprintf(logfile, "[_bt_next].\n");
 		fflush(logfile);
         fclose(logfile);
     }
+	#endif
 	/* btree indexes are never lossy */
 	scan->xs_recheck = false;
 
@@ -225,8 +226,15 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 		 * the appropriate direction.  If we haven't done so yet, we call
 		 * _bt_first() to get the first item in the scan.
 		 */
-		if (!BTScanPosIsValid(so->currPos))
+		if (!BTScanPosIsValid(so->currPos)){
+			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+			if (logfile != NULL) {
+				fprintf(logfile, "[btgettuple] call _bt_first .\n");
+				fflush(logfile);
+				fclose(logfile);
+			}
 			res = _bt_first(scan, dir);
+		}
 		else
 		{
 			/*
@@ -261,7 +269,12 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 			break;
 		/* ... otherwise see if we need another primitive index scan */
 	} while (so->numArrayKeys && _bt_start_prim_scan(scan, dir));
-
+    // logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[btgettuple] return %s.\n", res? "true": "false");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 	return res;
 }
 
@@ -271,6 +284,13 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 int64
 btgetbitmap(IndexScanDesc scan, TIDBitmap *tbm)
 {
+	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    if (logfile != NULL) {
+        fprintf(logfile, "[btgetbitmap]\n");
+		fflush(logfile);
+        fclose(logfile);
+    }
+
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	int64		ntids = 0;
 	ItemPointer heapTid;

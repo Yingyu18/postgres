@@ -5,7 +5,7 @@ ExecScan(&node->ss) // check that the current tuple satisfies the qual-clause
         ItemPointerData tid = index_getnext_tid(IndexScanDesc scan, ScanDirection direction)
             found = bool btgettuple(IndexScanDesc scan, ScanDirection dir)
                 res = bool _bt_first(IndexScanDesc scan, ScanDirection dir)
-                    if (!_bt_readpage(scan, dir, offnum, true))
+                    if (!_bt_readpage(IndexScanDesc scan, dir, offnum, true))
                         return false;
                             // if res = false, save redundant item to scan.
                                 return &scan->xs_heaptid; // TODO: return redundundant item and set the flag 

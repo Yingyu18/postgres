@@ -892,11 +892,11 @@ _bt_first(IndexScanDesc scan, ScanDirection dir)
 	BlockNumber blkno;
 
     FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[_bt_first].\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[_bt_first].\n");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 
 	Assert(!BTScanPosIsValid(so->currPos));
 
@@ -1462,8 +1462,21 @@ _bt_first(IndexScanDesc scan, ScanDirection dir)
 		 * the next page.  Return false if there's no matching data at all.
 		 */
 		_bt_unlockbuf(scan->indexRelation, so->currPos.buf);
-		if (!_bt_steppage(scan, dir))
+		if (!_bt_steppage(scan, dir)){
+			/*DBMS: non exist case, return false and save the last item*/
+			if (scan->hasRowSecurity){
+				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+				if (logfile != NULL) {
+					fprintf(logfile, "[_bt_first] !_bt_steppage save item and return false\n");
+					fflush(logfile);
+					fclose(logfile);
+				}
+				currItem = &so->currPos.items[so->currPos.itemIndex];
+				scan->xs_heaptid = currItem->heapTid;		
+			}
+			/*DBMS*/
 			return false;
+		}
 	}
 	else
 	{
@@ -1477,6 +1490,13 @@ readcomplete:
 	scan->xs_heaptid = currItem->heapTid;
 	if (scan->xs_want_itup)
 		scan->xs_itup = (IndexTuple) (so->currTuples + currItem->tupleOffset);
+
+    // logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[_bt_first]return true\n");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 
 	return true;
 }
@@ -1499,12 +1519,12 @@ bool
 _bt_next(IndexScanDesc scan, ScanDirection dir)
 {
 
-    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[_bt_next].\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
+    // FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[_bt_next].\n");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	BTScanPosItem *currItem;
@@ -1571,12 +1591,6 @@ static bool
 _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 			 bool firstPage)
 {
-	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-	if (logfile != NULL) {
-		fprintf(logfile, "[_bt_readpage]: start \n");
-		fflush(logfile);
-		fclose(logfile);
-	}
 	BTScanOpaque so = (BTScanOpaque) scan->opaque;
 	Page		page;
 	BTPageOpaque opaque;
@@ -1812,16 +1826,17 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 			if (!pstate.continuescan){
 
 				/*DBMS: Stroe a item for RLS*/
-				if (scan->hasRowSecurity && pstate.firstmatch == false)
+				if (firstPage && scan->hasRowSecurity && pstate.firstmatch == false && !BTreeTupleIsPosting(itup))
 				{
+					/* Remember a item at next next space in the array */
+					_bt_saveitem(so, 0, offnum, itup);
 					FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
 					if (logfile != NULL) {
-						fprintf(logfile, "[_bt_readpage]: !continue save item\n");
+						fprintf(logfile,"[_bt_readpage] !continue save item\n");
 						fflush(logfile);
 						fclose(logfile);
 					}
-					/* Remember a item at next next space in the array */
-					_bt_saveitem(so, 0, offnum, itup);
+					//itemIndex++;
 				}
 				/*DBMS*/
 
@@ -1830,19 +1845,17 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 
 			offnum = OffsetNumberNext(offnum);
 			/*DBMS: Stroe a item for RLS*/
-			if (scan->hasRowSecurity && pstate.firstmatch == false && offnum > maxoff){
-				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-				if (logfile != NULL) {
-					fprintf(logfile, "[_bt_readpage]: offnum > maxoff save item\n");
-					fflush(logfile);
-					fclose(logfile);
-				}
-				if (!BTreeTupleIsPosting(itup))
-				{
+			if (firstPage && scan->hasRowSecurity && pstate.firstmatch == false && offnum > maxoff && !BTreeTupleIsPosting(itup))
+			{
 					/* Remember a item at next next space in the array */
-	
 					_bt_saveitem(so, 0, offnum, itup);
-				}
+					FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+					if (logfile != NULL) {
+						fprintf(logfile,"[_bt_readpage] offnum > maxoff saveitem\n");
+						fflush(logfile);
+						fclose(logfile);
+					}
+					//itemIndex++;
 			}
 			/*DBMS*/
 
@@ -1999,7 +2012,12 @@ _bt_readpage(IndexScanDesc scan, ScanDirection dir, OffsetNumber offnum,
 		so->currPos.lastItem = MaxTIDsPerBTreePage - 1;
 		so->currPos.itemIndex = MaxTIDsPerBTreePage - 1;
 	}
-
+    // logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+    // if (logfile != NULL) {
+    //     fprintf(logfile, "[_bt_readpage] return %s\n", so->currPos.firstItem <= so->currPos.lastItem? "true" : "false");
+	// 	fflush(logfile);
+    //     fclose(logfile);
+    // }
 	return (so->currPos.firstItem <= so->currPos.lastItem);
 }
 
