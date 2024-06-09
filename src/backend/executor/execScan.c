@@ -21,8 +21,6 @@
 #include "executor/executor.h"
 #include "miscadmin.h"
 
-
-
 /*
  * ExecScanFetch -- check interrupts & fetch next potential tuple
  *
@@ -35,26 +33,20 @@ ExecScanFetch(ScanState *node,
 			  ExecScanAccessMtd accessMtd,
 			  ExecScanRecheckMtd recheckMtd)
 {
-    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[ExecScanFetch]\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
-	EState	   *estate = node->ps.state;
+	EState *estate = node->ps.state;
 
 	CHECK_FOR_INTERRUPTS();
 
 	if (estate->es_epq_active != NULL)
 	{
-		EPQState   *epqstate = estate->es_epq_active;
+		EPQState *epqstate = estate->es_epq_active;
 
 		/*
 		 * We are inside an EvalPlanQual recheck.  Return the test tuple if
 		 * one is available, after rechecking any access-method-specific
 		 * conditions.
 		 */
-		Index		scanrelid = ((Scan *) node->ps.plan)->scanrelid;
+		Index scanrelid = ((Scan *)node->ps.plan)->scanrelid;
 
 		if (scanrelid == 0)
 		{
@@ -67,8 +59,8 @@ ExecScanFetch(ScanState *node,
 
 			TupleTableSlot *slot = node->ss_ScanTupleSlot;
 
-			if (!(*recheckMtd) (node, slot))
-				ExecClearTuple(slot);	/* would not be returned by scan */
+			if (!(*recheckMtd)(node, slot))
+				ExecClearTuple(slot); /* would not be returned by scan */
 			return slot;
 		}
 		else if (epqstate->relsubs_done[scanrelid - 1])
@@ -100,9 +92,9 @@ ExecScanFetch(ScanState *node,
 				return NULL;
 
 			/* Check if it meets the access-method conditions */
-			if (!(*recheckMtd) (node, slot))
-				return ExecClearTuple(slot);	/* would not be returned by
-												 * scan */
+			if (!(*recheckMtd)(node, slot))
+				return ExecClearTuple(slot); /* would not be returned by
+											  * scan */
 			return slot;
 		}
 		else if (epqstate->relsubs_rowmark[scanrelid - 1] != NULL)
@@ -124,9 +116,9 @@ ExecScanFetch(ScanState *node,
 				return NULL;
 
 			/* Check if it meets the access-method conditions */
-			if (!(*recheckMtd) (node, slot))
-				return ExecClearTuple(slot);	/* would not be returned by
-												 * scan */
+			if (!(*recheckMtd)(node, slot))
+				return ExecClearTuple(slot); /* would not be returned by
+											  * scan */
 			return slot;
 		}
 	}
@@ -134,7 +126,7 @@ ExecScanFetch(ScanState *node,
 	/*
 	 * Run the node-type-specific access method function to get the next tuple
 	 */
-	return (*accessMtd) (node);
+	return (*accessMtd)(node);
 }
 
 /* ----------------------------------------------------------------
@@ -160,25 +152,13 @@ ExecScanFetch(ScanState *node,
  */
 TupleTableSlot *
 ExecScan(ScanState *node,
-		 ExecScanAccessMtd accessMtd,	/* function returning a tuple */
+		 ExecScanAccessMtd accessMtd, /* function returning a tuple */
 		 ExecScanRecheckMtd recheckMtd)
 {
-	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[ExecScan]: NodeTag %d\n", node->ps.type);
-		fflush(logfile);
-        fclose(logfile);
-    }
 	ExprContext *econtext;
-	ExprState  *qual;
+	ExprState *qual;
 	ProjectionInfo *projInfo;
-    
-	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[ExecScan] nodeTag: %d\n", node->ps.type);
-		fflush(logfile);
-        fclose(logfile);
-    }
+	bool runRLS = false;
 
 	/*
 	 * Fetch data from node
@@ -199,7 +179,9 @@ ExecScan(ScanState *node,
 		return ExecScanFetch(node, accessMtd, recheckMtd);
 	}
 
-
+	/* Initialize testslot to store the first tuple */
+	TupleTableSlot *testslot = MakeSingleTupleTableSlot(node->ss_ScanTupleSlot->tts_tupleDescriptor, &TTSOpsVirtual);
+	testslot = node->ss_ScanTupleSlot;
 	/*
 	 * Reset per-tuple memory context to free any expression evaluation
 	 * storage allocated in the previous tuple cycle.
@@ -224,34 +206,16 @@ ExecScan(ScanState *node,
 		 */
 		if (TupIsNull(slot))
 		{
-			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    		if (logfile != NULL) {
-        		fprintf(logfile, "[ExecScan]]: NULL slot \n");
-	            fflush(logfile);
-        		fclose(logfile);
-    		}
 			if (projInfo)
 				return ExecClearTuple(projInfo->pi_state.resultslot);
 			else
 				return slot;
 		}
 
-		// /*DBMS: test*/
-		// if (node->ps.hasRowSecurity){
-		// 	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-		// 	if (logfile != NULL) {
-		// 		fprintf(logfile, "[ExecScan] RLS return whatever slot\n");
-		// 		fflush(logfile);
-		// 		fclose(logfile);
-		// 	}
-		// 	return slot;
-		
-		// }
-		// /*DBMS: test*/
-
 		/*
 		 * place the current tuple into the expr context
 		 */
+		runRLS = true;
 		econtext->ecxt_scantuple = slot;
 
 		/*
@@ -261,21 +225,8 @@ ExecScan(ScanState *node,
 		 * when the qual is null ... saves only a few cycles, but they add up
 		 * ...
 		 */
-		FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-		if (logfile != NULL) {
-			fprintf(logfile, "[ExecScan] ready to ExecQual\n");
-			fflush(logfile);
-			fclose(logfile);
-		}
 		if (qual == NULL || ExecQual(qual, econtext))
 		{
-			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-				if (logfile != NULL) {
-					fprintf(logfile, "[ExecScan] %s\n", qual==NULL?"qual is NULL":"pass qual");
-					fflush(logfile);
-					fclose(logfile);
-				}
-
 			/*
 			 * Found a satisfactory scan tuple.
 			 */
@@ -295,20 +246,40 @@ ExecScan(ScanState *node,
 				return slot;
 			}
 		}
-		else{
-			/*DBMS*/
-			if(node->ps.hasRowSecurity){
-				FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-				if (logfile != NULL) {
-					fprintf(logfile, "[ExecScan] RLS done, return empty slot\n");
-					fflush(logfile);
-					fclose(logfile);
-				}
-				return ExecClearTuple(slot);
-			}
-			/*DBMS*/
+		else
 			InstrCountFiltered1(node, 1);
+
+		/*
+		 * Tuple fails qual, so free per-tuple memory and try again.
+		 */
+		ResetExprContext(econtext);
+	}
+	if (!runRLS)
+	{
+		econtext->ecxt_scantuple = testslot;
+		if (qual == NULL || ExecQual(qual, econtext))
+		{
+			/*
+			 * Found a satisfactory scan tuple.
+			 */
+			if (projInfo)
+			{
+				/*
+				 * Form a projection tuple, store it in the result tuple slot
+				 * and return it.
+				 */
+				return ExecProject(projInfo);
+			}
+			else
+			{
+				/*
+				 * Here, we aren't projecting, so just return scan tuple.
+				 */
+				return testslot;
+			}
 		}
+		else
+			InstrCountFiltered1(node, 1);
 
 		/*
 		 * Tuple fails qual, so free per-tuple memory and try again.
@@ -330,11 +301,10 @@ ExecScan(ScanState *node,
  *
  * The scan slot's descriptor must have been set already.
  */
-void
-ExecAssignScanProjectionInfo(ScanState *node)
+void ExecAssignScanProjectionInfo(ScanState *node)
 {
-	Scan	   *scan = (Scan *) node->ps.plan;
-	TupleDesc	tupdesc = node->ss_ScanTupleSlot->tts_tupleDescriptor;
+	Scan *scan = (Scan *)node->ps.plan;
+	TupleDesc tupdesc = node->ss_ScanTupleSlot->tts_tupleDescriptor;
 
 	ExecConditionalAssignProjectionInfo(&node->ps, tupdesc, scan->scanrelid);
 }
@@ -343,10 +313,9 @@ ExecAssignScanProjectionInfo(ScanState *node)
  * ExecAssignScanProjectionInfoWithVarno
  *		As above, but caller can specify varno expected in Vars in the tlist.
  */
-void
-ExecAssignScanProjectionInfoWithVarno(ScanState *node, int varno)
+void ExecAssignScanProjectionInfoWithVarno(ScanState *node, int varno)
 {
-	TupleDesc	tupdesc = node->ss_ScanTupleSlot->tts_tupleDescriptor;
+	TupleDesc tupdesc = node->ss_ScanTupleSlot->tts_tupleDescriptor;
 
 	ExecConditionalAssignProjectionInfo(&node->ps, tupdesc, varno);
 }
@@ -357,10 +326,9 @@ ExecAssignScanProjectionInfoWithVarno(ScanState *node, int varno)
  * This must be called within the ReScan function of any plan node type
  * that uses ExecScan().
  */
-void
-ExecScanReScan(ScanState *node)
+void ExecScanReScan(ScanState *node)
 {
-	EState	   *estate = node->ps.state;
+	EState *estate = node->ps.state;
 
 	/*
 	 * We must clear the scan tuple so that observers (e.g., execCurrent.c)
@@ -374,16 +342,16 @@ ExecScanReScan(ScanState *node)
 	 */
 	if (estate->es_epq_active != NULL)
 	{
-		EPQState   *epqstate = estate->es_epq_active;
-		Index		scanrelid = ((Scan *) node->ps.plan)->scanrelid;
+		EPQState *epqstate = estate->es_epq_active;
+		Index scanrelid = ((Scan *)node->ps.plan)->scanrelid;
 
 		if (scanrelid > 0)
 			epqstate->relsubs_done[scanrelid - 1] =
 				epqstate->relsubs_blocked[scanrelid - 1];
 		else
 		{
-			Bitmapset  *relids;
-			int			rtindex = -1;
+			Bitmapset *relids;
+			int rtindex = -1;
 
 			/*
 			 * If an FDW or custom scan provider has replaced the join with a
@@ -391,12 +359,12 @@ ExecScanReScan(ScanState *node)
 			 * all of them.
 			 */
 			if (IsA(node->ps.plan, ForeignScan))
-				relids = ((ForeignScan *) node->ps.plan)->fs_base_relids;
+				relids = ((ForeignScan *)node->ps.plan)->fs_base_relids;
 			else if (IsA(node->ps.plan, CustomScan))
-				relids = ((CustomScan *) node->ps.plan)->custom_relids;
+				relids = ((CustomScan *)node->ps.plan)->custom_relids;
 			else
 				elog(ERROR, "unexpected scan node: %d",
-					 (int) nodeTag(node->ps.plan));
+					 (int)nodeTag(node->ps.plan));
 
 			while ((rtindex = bms_next_member(relids, rtindex)) >= 0)
 			{

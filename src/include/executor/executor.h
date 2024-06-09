@@ -20,7 +20,6 @@
 #include "nodes/parsenodes.h"
 #include "utils/memutils.h"
 
-
 /*
  * The "eflags" argument to ExecutorStart and the various ExecInitNode
  * routines is a bitwise OR of the following flag bits, which tell the
@@ -62,45 +61,43 @@
  * ... WITH NO DATA.  Currently, the only effect is to suppress errors about
  * scanning unpopulated materialized views.
  */
-#define EXEC_FLAG_EXPLAIN_ONLY		0x0001	/* EXPLAIN, no ANALYZE */
-#define EXEC_FLAG_EXPLAIN_GENERIC	0x0002	/* EXPLAIN (GENERIC_PLAN) */
-#define EXEC_FLAG_REWIND			0x0004	/* need efficient rescan */
-#define EXEC_FLAG_BACKWARD			0x0008	/* need backward scan */
-#define EXEC_FLAG_MARK				0x0010	/* need mark/restore */
-#define EXEC_FLAG_SKIP_TRIGGERS		0x0020	/* skip AfterTrigger setup */
-#define EXEC_FLAG_WITH_NO_DATA		0x0040	/* REFRESH ... WITH NO DATA */
-
+#define EXEC_FLAG_EXPLAIN_ONLY 0x0001	 /* EXPLAIN, no ANALYZE */
+#define EXEC_FLAG_EXPLAIN_GENERIC 0x0002 /* EXPLAIN (GENERIC_PLAN) */
+#define EXEC_FLAG_REWIND 0x0004			 /* need efficient rescan */
+#define EXEC_FLAG_BACKWARD 0x0008		 /* need backward scan */
+#define EXEC_FLAG_MARK 0x0010			 /* need mark/restore */
+#define EXEC_FLAG_SKIP_TRIGGERS 0x0020	 /* skip AfterTrigger setup */
+#define EXEC_FLAG_WITH_NO_DATA 0x0040	 /* REFRESH ... WITH NO DATA */
 
 /* Hook for plugins to get control in ExecutorStart() */
-typedef void (*ExecutorStart_hook_type) (QueryDesc *queryDesc, int eflags);
+typedef void (*ExecutorStart_hook_type)(QueryDesc *queryDesc, int eflags);
 extern PGDLLIMPORT ExecutorStart_hook_type ExecutorStart_hook;
 
 /* Hook for plugins to get control in ExecutorRun() */
-typedef void (*ExecutorRun_hook_type) (QueryDesc *queryDesc,
-									   ScanDirection direction,
-									   uint64 count,
-									   bool execute_once);
+typedef void (*ExecutorRun_hook_type)(QueryDesc *queryDesc,
+									  ScanDirection direction,
+									  uint64 count,
+									  bool execute_once);
 extern PGDLLIMPORT ExecutorRun_hook_type ExecutorRun_hook;
 
 /* Hook for plugins to get control in ExecutorFinish() */
-typedef void (*ExecutorFinish_hook_type) (QueryDesc *queryDesc);
+typedef void (*ExecutorFinish_hook_type)(QueryDesc *queryDesc);
 extern PGDLLIMPORT ExecutorFinish_hook_type ExecutorFinish_hook;
 
 /* Hook for plugins to get control in ExecutorEnd() */
-typedef void (*ExecutorEnd_hook_type) (QueryDesc *queryDesc);
+typedef void (*ExecutorEnd_hook_type)(QueryDesc *queryDesc);
 extern PGDLLIMPORT ExecutorEnd_hook_type ExecutorEnd_hook;
 
 /* Hook for plugins to get control in ExecCheckPermissions() */
-typedef bool (*ExecutorCheckPerms_hook_type) (List *rangeTable,
-											  List *rtePermInfos,
-											  bool ereport_on_violation);
+typedef bool (*ExecutorCheckPerms_hook_type)(List *rangeTable,
+											 List *rtePermInfos,
+											 bool ereport_on_violation);
 extern PGDLLIMPORT ExecutorCheckPerms_hook_type ExecutorCheckPerms_hook;
-
 
 /*
  * prototypes from functions in execAmi.c
  */
-struct Path;					/* avoid including pathnodes.h here */
+struct Path; /* avoid including pathnodes.h here */
 
 extern void ExecReScan(PlanState *node);
 extern void ExecMarkPos(PlanState *node);
@@ -241,7 +238,7 @@ extern void EvalPlanQualSetPlan(EPQState *epqstate,
 extern TupleTableSlot *EvalPlanQualSlot(EPQState *epqstate,
 										Relation relation, Index rti);
 
-#define EvalPlanQualSetSlot(epqstate, slot)  ((epqstate)->origslot = (slot))
+#define EvalPlanQualSetSlot(epqstate, slot) ((epqstate)->origslot = (slot))
 extern bool EvalPlanQualFetchRowMark(EPQState *epqstate, Index rti, TupleTableSlot *slot);
 extern TupleTableSlot *EvalPlanQualNext(EPQState *epqstate);
 extern void EvalPlanQualBegin(EPQState *epqstate);
@@ -256,7 +253,6 @@ extern Node *MultiExecProcNode(PlanState *node);
 extern void ExecEndNode(PlanState *node);
 extern void ExecShutdownNode(PlanState *node);
 extern void ExecSetTupleBound(int64 tuples_needed, PlanState *child_node);
-
 
 /* ----------------------------------------------------------------
  *		ExecProcNode
@@ -349,7 +345,7 @@ ExecEvalExprSwitchContext(ExprState *state,
 						  ExprContext *econtext,
 						  bool *isNull)
 {
-	Datum		retDatum;
+	Datum retDatum;
 	MemoryContext oldContext;
 
 	oldContext = MemoryContextSwitchTo(econtext->ecxt_per_tuple_memory);
@@ -376,9 +372,9 @@ static inline TupleTableSlot *
 ExecProject(ProjectionInfo *projInfo)
 {
 	ExprContext *econtext = projInfo->pi_exprContext;
-	ExprState  *state = &projInfo->pi_state;
+	ExprState *state = &projInfo->pi_state;
 	TupleTableSlot *slot = state->resultslot;
-	bool		isnull;
+	bool isnull;
 
 	/*
 	 * Clear any former contents of the result slot.  This makes it safe for
@@ -387,7 +383,7 @@ ExecProject(ProjectionInfo *projInfo)
 	ExecClearTuple(slot);
 
 	/* Run the expression, discarding scalar result from the last column. */
-	(void) ExecEvalExprSwitchContext(state, econtext, &isnull);
+	(void)ExecEvalExprSwitchContext(state, econtext, &isnull);
 
 	/*
 	 * Successfully formed a result row.  Mark the result slot as containing a
@@ -412,15 +408,8 @@ ExecProject(ProjectionInfo *projInfo)
 static inline bool
 ExecQual(ExprState *state, ExprContext *econtext)
 {
-	Datum		ret;
-	bool		isnull;
-
-    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[ExeQual]\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
+	Datum ret;
+	bool isnull;
 
 	/* short-circuit (here and in ExecInitQual) for empty restriction list */
 	if (state == NULL)
@@ -446,7 +435,7 @@ ExecQual(ExprState *state, ExprContext *econtext)
 static inline bool
 ExecQualAndReset(ExprState *state, ExprContext *econtext)
 {
-	bool		ret = ExecQual(state, econtext);
+	bool ret = ExecQual(state, econtext);
 
 	/* inline ResetExprContext, to avoid ordering issue in this file */
 	MemoryContextReset(econtext->ecxt_per_tuple_memory);
@@ -477,8 +466,8 @@ extern Datum ExecMakeFunctionResultSet(SetExprState *fcache,
 /*
  * prototypes from functions in execScan.c
  */
-typedef TupleTableSlot *(*ExecScanAccessMtd) (ScanState *node);
-typedef bool (*ExecScanRecheckMtd) (ScanState *node, TupleTableSlot *slot);
+typedef TupleTableSlot *(*ExecScanAccessMtd)(ScanState *node);
+typedef bool (*ExecScanRecheckMtd)(ScanState *node, TupleTableSlot *slot);
 
 extern TupleTableSlot *ExecScan(ScanState *node, ExecScanAccessMtd accessMtd,
 								ExecScanRecheckMtd recheckMtd);
@@ -526,16 +515,16 @@ extern void end_tup_output(TupOutputState *tstate);
  *
  * Should only be used with a single-TEXT-attribute tupdesc.
  */
-#define do_text_output_oneline(tstate, str_to_emit) \
-	do { \
-		Datum	values_[1]; \
-		bool	isnull_[1]; \
+#define do_text_output_oneline(tstate, str_to_emit)                 \
+	do                                                              \
+	{                                                               \
+		Datum values_[1];                                           \
+		bool isnull_[1];                                            \
 		values_[0] = PointerGetDatum(cstring_to_text(str_to_emit)); \
-		isnull_[0] = false; \
-		do_tup_output(tstate, values_, isnull_); \
-		pfree(DatumGetPointer(values_[0])); \
+		isnull_[0] = false;                                         \
+		do_tup_output(tstate, values_, isnull_);                    \
+		pfree(DatumGetPointer(values_[0]));                         \
 	} while (0)
-
 
 /*
  * prototypes from functions in execUtils.c
@@ -555,17 +544,16 @@ extern ExprContext *MakePerTupleExprContext(EState *estate);
 
 /* Get an EState's per-output-tuple exprcontext, making it if first use */
 #define GetPerTupleExprContext(estate) \
-	((estate)->es_per_tuple_exprcontext ? \
-	 (estate)->es_per_tuple_exprcontext : \
-	 MakePerTupleExprContext(estate))
+	((estate)->es_per_tuple_exprcontext ? (estate)->es_per_tuple_exprcontext : MakePerTupleExprContext(estate))
 
 #define GetPerTupleMemoryContext(estate) \
 	(GetPerTupleExprContext(estate)->ecxt_per_tuple_memory)
 
 /* Reset an EState's per-output-tuple exprcontext, if one's been created */
-#define ResetPerTupleExprContext(estate) \
-	do { \
-		if ((estate)->es_per_tuple_exprcontext) \
+#define ResetPerTupleExprContext(estate)                          \
+	do                                                            \
+	{                                                             \
+		if ((estate)->es_per_tuple_exprcontext)                   \
 			ResetExprContext((estate)->es_per_tuple_exprcontext); \
 	} while (0)
 
@@ -593,14 +581,14 @@ extern void ExecCloseResultRelations(EState *estate);
 static inline RangeTblEntry *
 exec_rt_fetch(Index rti, EState *estate)
 {
-	return (RangeTblEntry *) list_nth(estate->es_range_table, rti - 1);
+	return (RangeTblEntry *)list_nth(estate->es_range_table, rti - 1);
 }
 
 extern Relation ExecGetRangeTableRelation(EState *estate, Index rti);
 extern void ExecInitResultRelation(EState *estate, ResultRelInfo *resultRelInfo,
 								   Index rti);
 
-extern int	executor_errposition(EState *estate, int location);
+extern int executor_errposition(EState *estate, int location);
 
 extern void RegisterExprContextCallback(ExprContext *econtext,
 										ExprContextCallbackFunction function,
@@ -614,8 +602,8 @@ extern Datum GetAttributeByName(HeapTupleHeader tuple, const char *attname,
 extern Datum GetAttributeByNum(HeapTupleHeader tuple, AttrNumber attrno,
 							   bool *isNull);
 
-extern int	ExecTargetListLength(List *targetlist);
-extern int	ExecCleanTargetListLength(List *targetlist);
+extern int ExecTargetListLength(List *targetlist);
+extern int ExecCleanTargetListLength(List *targetlist);
 
 extern TupleTableSlot *ExecGetTriggerOldSlot(EState *estate, ResultRelInfo *relInfo);
 extern TupleTableSlot *ExecGetTriggerNewSlot(EState *estate, ResultRelInfo *relInfo);
@@ -623,7 +611,7 @@ extern TupleTableSlot *ExecGetReturningSlot(EState *estate, ResultRelInfo *relIn
 extern TupleConversionMap *ExecGetChildToRootMap(ResultRelInfo *resultRelInfo);
 extern TupleConversionMap *ExecGetRootToChildMap(ResultRelInfo *resultRelInfo, EState *estate);
 
-extern Oid	ExecGetResultRelCheckAsUser(ResultRelInfo *relInfo, EState *estate);
+extern Oid ExecGetResultRelCheckAsUser(ResultRelInfo *relInfo, EState *estate);
 extern Bitmapset *ExecGetInsertedCols(ResultRelInfo *relinfo, EState *estate);
 extern Bitmapset *ExecGetUpdatedCols(ResultRelInfo *relinfo, EState *estate);
 extern Bitmapset *ExecGetExtraUpdatedCols(ResultRelInfo *relinfo, EState *estate);
@@ -685,4 +673,4 @@ extern ResultRelInfo *ExecLookupResultRelByOid(ModifyTableState *node,
 											   bool missing_ok,
 											   bool update_cache);
 
-#endif							/* EXECUTOR_H  */
+#endif /* EXECUTOR_H  */

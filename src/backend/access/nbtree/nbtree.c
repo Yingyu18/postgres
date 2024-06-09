@@ -36,7 +36,6 @@
 #include "utils/index_selfuncs.h"
 #include "utils/memutils.h"
 
-
 /*
  * BTPARALLEL_NOT_INITIALIZED indicates that the scan has not started.
  *
@@ -67,21 +66,20 @@ typedef enum
 typedef struct BTParallelScanDescData
 {
 	BlockNumber btps_scanPage;	/* latest or next page to be scanned */
-	BTPS_State	btps_pageStatus;	/* indicates whether next page is
-									 * available for scan. see above for
-									 * possible states of parallel scan. */
-	slock_t		btps_mutex;		/* protects above variables, btps_arrElems */
+	BTPS_State btps_pageStatus; /* indicates whether next page is
+								 * available for scan. see above for
+								 * possible states of parallel scan. */
+	slock_t btps_mutex;			/* protects above variables, btps_arrElems */
 	ConditionVariable btps_cv;	/* used to synchronize parallel scan */
 
 	/*
 	 * btps_arrElems is used when scans need to schedule another primitive
 	 * index scan.  Holds BTArrayKeyInfo.cur_elem offsets for scan keys.
 	 */
-	int			btps_arrElems[FLEXIBLE_ARRAY_MEMBER];
-}			BTParallelScanDescData;
+	int btps_arrElems[FLEXIBLE_ARRAY_MEMBER];
+} BTParallelScanDescData;
 
 typedef struct BTParallelScanDescData *BTParallelScanDesc;
-
 
 static void btvacuumscan(IndexVacuumInfo *info, IndexBulkDeleteResult *stats,
 						 IndexBulkDeleteCallback callback, void *callback_state,
@@ -92,13 +90,11 @@ static BTVacuumPosting btreevacuumposting(BTVacState *vstate,
 										  OffsetNumber updatedoffset,
 										  int *nremaining);
 
-
 /*
  * Btree handler function: return IndexAmRoutine with access method parameters
  * and callbacks.
  */
-Datum
-bthandler(PG_FUNCTION_ARGS)
+Datum bthandler(PG_FUNCTION_ARGS)
 {
 	IndexAmRoutine *amroutine = makeNode(IndexAmRoutine);
 
@@ -155,10 +151,9 @@ bthandler(PG_FUNCTION_ARGS)
 /*
  *	btbuildempty() -- build an empty btree index in the initialization fork
  */
-void
-btbuildempty(Relation index)
+void btbuildempty(Relation index)
 {
-	bool		allequalimage = _bt_allequalimage(index, false);
+	bool allequalimage = _bt_allequalimage(index, false);
 	BulkWriteState *bulkstate;
 	BulkWriteBuffer metabuf;
 
@@ -166,7 +161,7 @@ btbuildempty(Relation index)
 
 	/* Construct metapage. */
 	metabuf = smgr_bulk_get_buf(bulkstate);
-	_bt_initmetapage((Page) metabuf, P_NONE, 0, allequalimage);
+	_bt_initmetapage((Page)metabuf, P_NONE, 0, allequalimage);
 	smgr_bulk_write(bulkstate, BTREE_METAPAGE, metabuf, true);
 
 	smgr_bulk_finish(bulkstate);
@@ -178,15 +173,14 @@ btbuildempty(Relation index)
  *		Descend the tree recursively, find the appropriate location for our
  *		new tuple, and put it there.
  */
-bool
-btinsert(Relation rel, Datum *values, bool *isnull,
-		 ItemPointer ht_ctid, Relation heapRel,
-		 IndexUniqueCheck checkUnique,
-		 bool indexUnchanged,
-		 IndexInfo *indexInfo)
+bool btinsert(Relation rel, Datum *values, bool *isnull,
+			  ItemPointer ht_ctid, Relation heapRel,
+			  IndexUniqueCheck checkUnique,
+			  bool indexUnchanged,
+			  IndexInfo *indexInfo)
 {
-	bool		result;
-	IndexTuple	itup;
+	bool result;
+	IndexTuple itup;
 
 	/* generate an index tuple */
 	itup = index_form_tuple(RelationGetDescr(rel), values, isnull);
@@ -202,19 +196,13 @@ btinsert(Relation rel, Datum *values, bool *isnull,
 /*
  *	btgettuple() -- Get the next tuple in the scan.
  */
-bool
-btgettuple(IndexScanDesc scan, ScanDirection dir)
+bool btgettuple(IndexScanDesc scan, ScanDirection dir)
 {
-	BTScanOpaque so = (BTScanOpaque) scan->opaque;
-	bool		res;
-    #ifdef DEBUG
-    FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[_bt_next].\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
-	#endif
+	BTScanOpaque so = (BTScanOpaque)scan->opaque;
+	bool res;
+#ifdef DEBUG
+
+#endif
 	/* btree indexes are never lossy */
 	scan->xs_recheck = false;
 
@@ -226,13 +214,9 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 		 * the appropriate direction.  If we haven't done so yet, we call
 		 * _bt_first() to get the first item in the scan.
 		 */
-		if (!BTScanPosIsValid(so->currPos)){
-			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-			if (logfile != NULL) {
-				fprintf(logfile, "[btgettuple] call _bt_first .\n");
-				fflush(logfile);
-				fclose(logfile);
-			}
+		if (!BTScanPosIsValid(so->currPos))
+		{
+
 			res = _bt_first(scan, dir);
 		}
 		else
@@ -269,30 +253,23 @@ btgettuple(IndexScanDesc scan, ScanDirection dir)
 			break;
 		/* ... otherwise see if we need another primitive index scan */
 	} while (so->numArrayKeys && _bt_start_prim_scan(scan, dir));
-    // logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    // if (logfile != NULL) {
-    //     fprintf(logfile, "[btgettuple] return %s.\n", res? "true": "false");
+	// logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
+	// if (logfile != NULL) {
+	//     fprintf(logfile, "[btgettuple] return %s.\n", res? "true": "false");
 	// 	fflush(logfile);
-    //     fclose(logfile);
-    // }
+	//     fclose(logfile);
+	// }
 	return res;
 }
 
 /*
  * btgetbitmap() -- gets all matching tuples, and adds them to a bitmap
  */
-int64
-btgetbitmap(IndexScanDesc scan, TIDBitmap *tbm)
+int64 btgetbitmap(IndexScanDesc scan, TIDBitmap *tbm)
 {
-	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[btgetbitmap]\n");
-		fflush(logfile);
-        fclose(logfile);
-    }
 
-	BTScanOpaque so = (BTScanOpaque) scan->opaque;
-	int64		ntids = 0;
+	BTScanOpaque so = (BTScanOpaque)scan->opaque;
+	int64 ntids = 0;
 	ItemPointer heapTid;
 
 	/* Each loop iteration performs another primitive index scan */
@@ -347,11 +324,11 @@ btbeginscan(Relation rel, int nkeys, int norderbys)
 	scan = RelationGetIndexScan(rel, nkeys, norderbys);
 
 	/* allocate private workspace */
-	so = (BTScanOpaque) palloc(sizeof(BTScanOpaqueData));
+	so = (BTScanOpaque)palloc(sizeof(BTScanOpaqueData));
 	BTScanPosInvalidate(so->currPos);
 	BTScanPosInvalidate(so->markPos);
 	if (scan->numberOfKeys > 0)
-		so->keyData = (ScanKey) palloc(scan->numberOfKeys * sizeof(ScanKeyData));
+		so->keyData = (ScanKey)palloc(scan->numberOfKeys * sizeof(ScanKeyData));
 	else
 		so->keyData = NULL;
 
@@ -361,7 +338,7 @@ btbeginscan(Relation rel, int nkeys, int norderbys)
 	so->orderProcs = NULL;
 	so->arrayContext = NULL;
 
-	so->killedItems = NULL;		/* until needed */
+	so->killedItems = NULL; /* until needed */
 	so->numKilled = 0;
 
 	/*
@@ -381,11 +358,10 @@ btbeginscan(Relation rel, int nkeys, int norderbys)
 /*
  *	btrescan() -- rescan an index relation
  */
-void
-btrescan(IndexScanDesc scan, ScanKey scankey, int nscankeys,
-		 ScanKey orderbys, int norderbys)
+void btrescan(IndexScanDesc scan, ScanKey scankey, int nscankeys,
+			  ScanKey orderbys, int norderbys)
 {
-	BTScanOpaque so = (BTScanOpaque) scan->opaque;
+	BTScanOpaque so = (BTScanOpaque)scan->opaque;
 
 	/* we aren't holding any read locks, but gotta drop the pins */
 	if (BTScanPosIsValid(so->currPos))
@@ -421,7 +397,7 @@ btrescan(IndexScanDesc scan, ScanKey scankey, int nscankeys,
 	 */
 	if (scan->xs_want_itup && so->currTuples == NULL)
 	{
-		so->currTuples = (char *) palloc(BLCKSZ * 2);
+		so->currTuples = (char *)palloc(BLCKSZ * 2);
 		so->markTuples = so->currTuples + BLCKSZ;
 	}
 
@@ -432,17 +408,16 @@ btrescan(IndexScanDesc scan, ScanKey scankey, int nscankeys,
 		memmove(scan->keyData,
 				scankey,
 				scan->numberOfKeys * sizeof(ScanKeyData));
-	so->numberOfKeys = 0;		/* until _bt_preprocess_keys sets it */
-	so->numArrayKeys = 0;		/* ditto */
+	so->numberOfKeys = 0; /* until _bt_preprocess_keys sets it */
+	so->numArrayKeys = 0; /* ditto */
 }
 
 /*
  *	btendscan() -- close down a scan
  */
-void
-btendscan(IndexScanDesc scan)
+void btendscan(IndexScanDesc scan)
 {
-	BTScanOpaque so = (BTScanOpaque) scan->opaque;
+	BTScanOpaque so = (BTScanOpaque)scan->opaque;
 
 	/* we aren't holding any read locks, but gotta drop the pins */
 	if (BTScanPosIsValid(so->currPos))
@@ -475,10 +450,9 @@ btendscan(IndexScanDesc scan)
 /*
  *	btmarkpos() -- save current scan position
  */
-void
-btmarkpos(IndexScanDesc scan)
+void btmarkpos(IndexScanDesc scan)
 {
-	BTScanOpaque so = (BTScanOpaque) scan->opaque;
+	BTScanOpaque so = (BTScanOpaque)scan->opaque;
 
 	/* There may be an old mark with a pin (but no lock). */
 	BTScanPosUnpinIfPinned(so->markPos);
@@ -501,10 +475,9 @@ btmarkpos(IndexScanDesc scan)
 /*
  *	btrestrpos() -- restore scan to last saved position
  */
-void
-btrestrpos(IndexScanDesc scan)
+void btrestrpos(IndexScanDesc scan)
 {
-	BTScanOpaque so = (BTScanOpaque) scan->opaque;
+	BTScanOpaque so = (BTScanOpaque)scan->opaque;
 
 	if (so->markItemIndex >= 0)
 	{
@@ -540,7 +513,7 @@ btrestrpos(IndexScanDesc scan)
 				IncrBufferRefCount(so->markPos.buf);
 			memcpy(&so->currPos, &so->markPos,
 				   offsetof(BTScanPosData, items[1]) +
-				   so->markPos.lastItem * sizeof(BTScanPosItem));
+					   so->markPos.lastItem * sizeof(BTScanPosItem));
 			if (so->currTuples)
 				memcpy(so->currTuples, so->markTuples,
 					   so->markPos.nextTupleOffset);
@@ -559,8 +532,7 @@ btrestrpos(IndexScanDesc scan)
 /*
  * btestimateparallelscan -- estimate storage for BTParallelScanDescData
  */
-Size
-btestimateparallelscan(int nkeys, int norderbys)
+Size btestimateparallelscan(int nkeys, int norderbys)
 {
 	/* Pessimistically assume all input scankeys will be output with arrays */
 	return offsetof(BTParallelScanDescData, btps_arrElems) + sizeof(int) * nkeys;
@@ -569,10 +541,9 @@ btestimateparallelscan(int nkeys, int norderbys)
 /*
  * btinitparallelscan -- initialize BTParallelScanDesc for parallel btree scan
  */
-void
-btinitparallelscan(void *target)
+void btinitparallelscan(void *target)
 {
-	BTParallelScanDesc bt_target = (BTParallelScanDesc) target;
+	BTParallelScanDesc bt_target = (BTParallelScanDesc)target;
 
 	SpinLockInit(&bt_target->btps_mutex);
 	bt_target->btps_scanPage = InvalidBlockNumber;
@@ -583,16 +554,15 @@ btinitparallelscan(void *target)
 /*
  *	btparallelrescan() -- reset parallel scan
  */
-void
-btparallelrescan(IndexScanDesc scan)
+void btparallelrescan(IndexScanDesc scan)
 {
 	BTParallelScanDesc btscan;
 	ParallelIndexScanDesc parallel_scan = scan->parallel_scan;
 
 	Assert(parallel_scan);
 
-	btscan = (BTParallelScanDesc) OffsetToPointer((void *) parallel_scan,
-												  parallel_scan->ps_offset);
+	btscan = (BTParallelScanDesc)OffsetToPointer((void *)parallel_scan,
+												 parallel_scan->ps_offset);
 
 	/*
 	 * In theory, we don't need to acquire the spinlock here, because there
@@ -627,12 +597,11 @@ btparallelrescan(IndexScanDesc scan)
  * pass first=true (all other callers pass first=false).  We just return false
  * for first=false callers that require another primitive index scan.
  */
-bool
-_bt_parallel_seize(IndexScanDesc scan, BlockNumber *pageno, bool first)
+bool _bt_parallel_seize(IndexScanDesc scan, BlockNumber *pageno, bool first)
 {
-	BTScanOpaque so = (BTScanOpaque) scan->opaque;
-	bool		exit_loop = false;
-	bool		status = true;
+	BTScanOpaque so = (BTScanOpaque)scan->opaque;
+	bool exit_loop = false;
+	bool status = true;
 	ParallelIndexScanDesc parallel_scan = scan->parallel_scan;
 	BTParallelScanDesc btscan;
 
@@ -663,8 +632,8 @@ _bt_parallel_seize(IndexScanDesc scan, BlockNumber *pageno, bool first)
 			return false;
 	}
 
-	btscan = (BTParallelScanDesc) OffsetToPointer((void *) parallel_scan,
-												  parallel_scan->ps_offset);
+	btscan = (BTParallelScanDesc)OffsetToPointer((void *)parallel_scan,
+												 parallel_scan->ps_offset);
 
 	while (1)
 	{
@@ -689,7 +658,7 @@ _bt_parallel_seize(IndexScanDesc scan, BlockNumber *pageno, bool first)
 				for (int i = 0; i < so->numArrayKeys; i++)
 				{
 					BTArrayKeyInfo *array = &so->arrayKeys[i];
-					ScanKey		skey = &so->keyData[array->scan_key];
+					ScanKey skey = &so->keyData[array->scan_key];
 
 					array->cur_elem = btscan->btps_arrElems[i];
 					skey->sk_argument = array->elem_values[array->cur_elem];
@@ -731,14 +700,13 @@ _bt_parallel_seize(IndexScanDesc scan, BlockNumber *pageno, bool first)
  * scan_page won't be scanned by any backend (unless the next primitive index
  * scan lands on scan_page).
  */
-void
-_bt_parallel_release(IndexScanDesc scan, BlockNumber scan_page)
+void _bt_parallel_release(IndexScanDesc scan, BlockNumber scan_page)
 {
 	ParallelIndexScanDesc parallel_scan = scan->parallel_scan;
 	BTParallelScanDesc btscan;
 
-	btscan = (BTParallelScanDesc) OffsetToPointer((void *) parallel_scan,
-												  parallel_scan->ps_offset);
+	btscan = (BTParallelScanDesc)OffsetToPointer((void *)parallel_scan,
+												 parallel_scan->ps_offset);
 
 	SpinLockAcquire(&btscan->btps_mutex);
 	btscan->btps_scanPage = scan_page;
@@ -754,19 +722,18 @@ _bt_parallel_release(IndexScanDesc scan, BlockNumber scan_page)
  * notify other workers.  Otherwise, they might wait forever for the scan to
  * advance to the next page.
  */
-void
-_bt_parallel_done(IndexScanDesc scan)
+void _bt_parallel_done(IndexScanDesc scan)
 {
 	ParallelIndexScanDesc parallel_scan = scan->parallel_scan;
 	BTParallelScanDesc btscan;
-	bool		status_changed = false;
+	bool status_changed = false;
 
 	/* Do nothing, for non-parallel scans */
 	if (parallel_scan == NULL)
 		return;
 
-	btscan = (BTParallelScanDesc) OffsetToPointer((void *) parallel_scan,
-												  parallel_scan->ps_offset);
+	btscan = (BTParallelScanDesc)OffsetToPointer((void *)parallel_scan,
+												 parallel_scan->ps_offset);
 
 	/*
 	 * Mark the parallel scan as done, unless some other process did so
@@ -793,17 +760,16 @@ _bt_parallel_done(IndexScanDesc scan)
  * if the shared parallel state hasn't been seized since caller's backend last
  * advanced the scan.
  */
-void
-_bt_parallel_primscan_schedule(IndexScanDesc scan, BlockNumber prev_scan_page)
+void _bt_parallel_primscan_schedule(IndexScanDesc scan, BlockNumber prev_scan_page)
 {
-	BTScanOpaque so = (BTScanOpaque) scan->opaque;
+	BTScanOpaque so = (BTScanOpaque)scan->opaque;
 	ParallelIndexScanDesc parallel_scan = scan->parallel_scan;
 	BTParallelScanDesc btscan;
 
 	Assert(so->numArrayKeys);
 
-	btscan = (BTParallelScanDesc) OffsetToPointer((void *) parallel_scan,
-												  parallel_scan->ps_offset);
+	btscan = (BTParallelScanDesc)OffsetToPointer((void *)parallel_scan,
+												 parallel_scan->ps_offset);
 
 	SpinLockAcquire(&btscan->btps_mutex);
 	if (btscan->btps_scanPage == prev_scan_page &&
@@ -834,12 +800,12 @@ IndexBulkDeleteResult *
 btbulkdelete(IndexVacuumInfo *info, IndexBulkDeleteResult *stats,
 			 IndexBulkDeleteCallback callback, void *callback_state)
 {
-	Relation	rel = info->index;
-	BTCycleId	cycleid;
+	Relation rel = info->index;
+	BTCycleId cycleid;
 
 	/* allocate stats if first time through, else re-use existing struct */
 	if (stats == NULL)
-		stats = (IndexBulkDeleteResult *) palloc0(sizeof(IndexBulkDeleteResult));
+		stats = (IndexBulkDeleteResult *)palloc0(sizeof(IndexBulkDeleteResult));
 
 	/* Establish the vacuum cycle ID to use for this scan */
 	/* The ENSURE stuff ensures we clean up shared memory on failure */
@@ -900,7 +866,7 @@ btvacuumcleanup(IndexVacuumInfo *info, IndexBulkDeleteResult *stats)
 		 * We handle the problem by making num_index_tuples an estimate in
 		 * cleanup-only case.
 		 */
-		stats = (IndexBulkDeleteResult *) palloc0(sizeof(IndexBulkDeleteResult));
+		stats = (IndexBulkDeleteResult *)palloc0(sizeof(IndexBulkDeleteResult));
 		btvacuumscan(info, stats, NULL, NULL, 0);
 		stats->estimated_count = true;
 	}
@@ -953,11 +919,11 @@ btvacuumscan(IndexVacuumInfo *info, IndexBulkDeleteResult *stats,
 			 IndexBulkDeleteCallback callback, void *callback_state,
 			 BTCycleId cycleid)
 {
-	Relation	rel = info->index;
-	BTVacState	vstate;
+	Relation rel = info->index;
+	BTVacState vstate;
 	BlockNumber num_pages;
 	BlockNumber scanblkno;
-	bool		needLock;
+	bool needLock;
 
 	/*
 	 * Reset fields that track information about the entire index now.  This
@@ -1088,14 +1054,14 @@ btvacuumpage(BTVacState *vstate, BlockNumber scanblkno)
 	IndexVacuumInfo *info = vstate->info;
 	IndexBulkDeleteResult *stats = vstate->stats;
 	IndexBulkDeleteCallback callback = vstate->callback;
-	void	   *callback_state = vstate->callback_state;
-	Relation	rel = info->index;
-	Relation	heaprel = info->heaprel;
-	bool		attempt_pagedel;
+	void *callback_state = vstate->callback_state;
+	Relation rel = info->index;
+	Relation heaprel = info->heaprel;
+	bool attempt_pagedel;
 	BlockNumber blkno,
-				backtrack_to;
-	Buffer		buf;
-	Page		page;
+		backtrack_to;
+	Buffer buf;
+	Page page;
 	BTPageOpaque opaque;
 
 	blkno = scanblkno;
@@ -1203,14 +1169,14 @@ backtrack:
 	else if (P_ISLEAF(opaque))
 	{
 		OffsetNumber deletable[MaxIndexTuplesPerPage];
-		int			ndeletable;
+		int ndeletable;
 		BTVacuumPosting updatable[MaxIndexTuplesPerPage];
-		int			nupdatable;
+		int nupdatable;
 		OffsetNumber offnum,
-					minoff,
-					maxoff;
-		int			nhtidsdead,
-					nhtidslive;
+			minoff,
+			maxoff;
+		int nhtidsdead,
+			nhtidslive;
 
 		/*
 		 * Trade in the initial read lock for a full cleanup lock on this
@@ -1249,10 +1215,10 @@ backtrack:
 				 offnum <= maxoff;
 				 offnum = OffsetNumberNext(offnum))
 			{
-				IndexTuple	itup;
+				IndexTuple itup;
 
-				itup = (IndexTuple) PageGetItem(page,
-												PageGetItemId(page, offnum));
+				itup = (IndexTuple)PageGetItem(page,
+											   PageGetItemId(page, offnum));
 
 				Assert(!BTreeTupleIsPivot(itup));
 				if (!BTreeTupleIsPosting(itup))
@@ -1269,7 +1235,7 @@ backtrack:
 				else
 				{
 					BTVacuumPosting vacposting;
-					int			nremaining;
+					int nremaining;
 
 					/* Posting list tuple */
 					vacposting = btreevacuumposting(vstate, itup, offnum,
@@ -1421,8 +1387,8 @@ static BTVacuumPosting
 btreevacuumposting(BTVacState *vstate, IndexTuple posting,
 				   OffsetNumber updatedoffset, int *nremaining)
 {
-	int			live = 0;
-	int			nitem = BTreeTupleGetNPosting(posting);
+	int live = 0;
+	int nitem = BTreeTupleGetNPosting(posting);
 	ItemPointer items = BTreeTupleGetPosting(posting);
 	BTVacuumPosting vacposting = NULL;
 
@@ -1466,8 +1432,7 @@ btreevacuumposting(BTVacState *vstate, IndexTuple posting,
  *
  * btrees always do, so this is trivial.
  */
-bool
-btcanreturn(Relation index, int attno)
+bool btcanreturn(Relation index, int attno)
 {
 	return true;
 }

@@ -58,7 +58,6 @@
 #include "utils/snapmgr.h"
 #include "utils/syscache.h"
 
-
 /* ----------------------------------------------------------------
  *					macros used in index_ routines
  *
@@ -72,43 +71,44 @@
  * ambuild to call its subsidiary routines through this file.
  * ----------------------------------------------------------------
  */
-#define RELATION_CHECKS \
-do { \
-	Assert(RelationIsValid(indexRelation)); \
-	Assert(PointerIsValid(indexRelation->rd_indam)); \
-	if (unlikely(ReindexIsProcessingIndex(RelationGetRelid(indexRelation)))) \
-		ereport(ERROR, \
-				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED), \
-				 errmsg("cannot access index \"%s\" while it is being reindexed", \
-						RelationGetRelationName(indexRelation)))); \
-} while(0)
+#define RELATION_CHECKS                                                               \
+	do                                                                                \
+	{                                                                                 \
+		Assert(RelationIsValid(indexRelation));                                       \
+		Assert(PointerIsValid(indexRelation->rd_indam));                              \
+		if (unlikely(ReindexIsProcessingIndex(RelationGetRelid(indexRelation))))      \
+			ereport(ERROR,                                                            \
+					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),                          \
+					 errmsg("cannot access index \"%s\" while it is being reindexed", \
+							RelationGetRelationName(indexRelation))));                \
+	} while (0)
 
-#define SCAN_CHECKS \
-( \
-	AssertMacro(IndexScanIsValid(scan)), \
-	AssertMacro(RelationIsValid(scan->indexRelation)), \
-	AssertMacro(PointerIsValid(scan->indexRelation->rd_indam)) \
-)
+#define SCAN_CHECKS                                        \
+	(                                                      \
+		AssertMacro(IndexScanIsValid(scan)),               \
+		AssertMacro(RelationIsValid(scan->indexRelation)), \
+		AssertMacro(PointerIsValid(scan->indexRelation->rd_indam)))
 
-#define CHECK_REL_PROCEDURE(pname) \
-do { \
-	if (indexRelation->rd_indam->pname == NULL) \
-		elog(ERROR, "function \"%s\" is not defined for index \"%s\"", \
-			 CppAsString(pname), RelationGetRelationName(indexRelation)); \
-} while(0)
+#define CHECK_REL_PROCEDURE(pname)                                            \
+	do                                                                        \
+	{                                                                         \
+		if (indexRelation->rd_indam->pname == NULL)                           \
+			elog(ERROR, "function \"%s\" is not defined for index \"%s\"",    \
+				 CppAsString(pname), RelationGetRelationName(indexRelation)); \
+	} while (0)
 
-#define CHECK_SCAN_PROCEDURE(pname) \
-do { \
-	if (scan->indexRelation->rd_indam->pname == NULL) \
-		elog(ERROR, "function \"%s\" is not defined for index \"%s\"", \
-			 CppAsString(pname), RelationGetRelationName(scan->indexRelation)); \
-} while(0)
+#define CHECK_SCAN_PROCEDURE(pname)                                                 \
+	do                                                                              \
+	{                                                                               \
+		if (scan->indexRelation->rd_indam->pname == NULL)                           \
+			elog(ERROR, "function \"%s\" is not defined for index \"%s\"",          \
+				 CppAsString(pname), RelationGetRelationName(scan->indexRelation)); \
+	} while (0)
 
 static IndexScanDesc index_beginscan_internal(Relation indexRelation,
 											  int nkeys, int norderbys, Snapshot snapshot,
 											  ParallelIndexScanDesc pscan, bool temp_snap);
 static inline void validate_relation_kind(Relation r);
-
 
 /* ----------------------------------------------------------------
  *				   index_ interface functions
@@ -132,7 +132,7 @@ static inline void validate_relation_kind(Relation r);
 Relation
 index_open(Oid relationId, LOCKMODE lockmode)
 {
-	Relation	r;
+	Relation r;
 
 	r = relation_open(relationId, lockmode);
 
@@ -151,7 +151,7 @@ index_open(Oid relationId, LOCKMODE lockmode)
 Relation
 try_index_open(Oid relationId, LOCKMODE lockmode)
 {
-	Relation	r;
+	Relation r;
 
 	r = try_relation_open(relationId, lockmode);
 
@@ -173,10 +173,9 @@ try_index_open(Oid relationId, LOCKMODE lockmode)
  *		in that case, the lock is released automatically at xact end.
  * ----------------
  */
-void
-index_close(Relation relation, LOCKMODE lockmode)
+void index_close(Relation relation, LOCKMODE lockmode)
 {
-	LockRelId	relid = relation->rd_lockInfo.lockRelId;
+	LockRelId relid = relation->rd_lockInfo.lockRelId;
 
 	Assert(lockmode >= NoLock && lockmode < MAX_LOCKMODES);
 
@@ -204,27 +203,25 @@ validate_relation_kind(Relation r)
 						RelationGetRelationName(r))));
 }
 
-
 /* ----------------
  *		index_insert - insert an index tuple into a relation
  * ----------------
  */
-bool
-index_insert(Relation indexRelation,
-			 Datum *values,
-			 bool *isnull,
-			 ItemPointer heap_t_ctid,
-			 Relation heapRelation,
-			 IndexUniqueCheck checkUnique,
-			 bool indexUnchanged,
-			 IndexInfo *indexInfo)
+bool index_insert(Relation indexRelation,
+				  Datum *values,
+				  bool *isnull,
+				  ItemPointer heap_t_ctid,
+				  Relation heapRelation,
+				  IndexUniqueCheck checkUnique,
+				  bool indexUnchanged,
+				  IndexInfo *indexInfo)
 {
 	RELATION_CHECKS;
 	CHECK_REL_PROCEDURE(aminsert);
 
 	if (!(indexRelation->rd_indam->ampredlocks))
 		CheckForSerializableConflictIn(indexRelation,
-									   (ItemPointer) NULL,
+									   (ItemPointer)NULL,
 									   InvalidBlockNumber);
 
 	return indexRelation->rd_indam->aminsert(indexRelation, values, isnull,
@@ -237,9 +234,8 @@ index_insert(Relation indexRelation,
  *		index_insert_cleanup - clean up after all index inserts are done
  * -------------------------
  */
-void
-index_insert_cleanup(Relation indexRelation,
-					 IndexInfo *indexInfo)
+void index_insert_cleanup(Relation indexRelation,
+						  IndexInfo *indexInfo)
 {
 	RELATION_CHECKS;
 
@@ -348,10 +344,9 @@ index_beginscan_internal(Relation indexRelation,
  * scan->numberOfKeys is zero.)
  * ----------------
  */
-void
-index_rescan(IndexScanDesc scan,
-			 ScanKey keys, int nkeys,
-			 ScanKey orderbys, int norderbys)
+void index_rescan(IndexScanDesc scan,
+				  ScanKey keys, int nkeys,
+				  ScanKey orderbys, int norderbys)
 {
 	SCAN_CHECKS;
 	CHECK_SCAN_PROCEDURE(amrescan);
@@ -374,8 +369,7 @@ index_rescan(IndexScanDesc scan,
  *		index_endscan - end a scan
  * ----------------
  */
-void
-index_endscan(IndexScanDesc scan)
+void index_endscan(IndexScanDesc scan)
 {
 	SCAN_CHECKS;
 	CHECK_SCAN_PROCEDURE(amendscan);
@@ -404,8 +398,7 @@ index_endscan(IndexScanDesc scan)
  *		index_markpos  - mark a scan position
  * ----------------
  */
-void
-index_markpos(IndexScanDesc scan)
+void index_markpos(IndexScanDesc scan)
 {
 	SCAN_CHECKS;
 	CHECK_SCAN_PROCEDURE(ammarkpos);
@@ -428,8 +421,7 @@ index_markpos(IndexScanDesc scan)
  * could be fixed if necessary, but for now it seems unimportant.
  * ----------------
  */
-void
-index_restrpos(IndexScanDesc scan)
+void index_restrpos(IndexScanDesc scan)
 {
 	Assert(IsMVCCSnapshot(scan->xs_snapshot));
 
@@ -449,11 +441,10 @@ index_restrpos(IndexScanDesc scan)
 /*
  * index_parallelscan_estimate - estimate shared memory for parallel scan
  */
-Size
-index_parallelscan_estimate(Relation indexRelation, int nkeys, int norderbys,
-							Snapshot snapshot)
+Size index_parallelscan_estimate(Relation indexRelation, int nkeys, int norderbys,
+								 Snapshot snapshot)
 {
-	Size		nbytes;
+	Size nbytes;
 
 	Assert(snapshot != InvalidSnapshot);
 
@@ -486,11 +477,10 @@ index_parallelscan_estimate(Relation indexRelation, int nkeys, int norderbys,
  * initialize am specific information.  Call this just once in the leader
  * process; then, individual workers attach via index_beginscan_parallel.
  */
-void
-index_parallelscan_initialize(Relation heapRelation, Relation indexRelation,
-							  Snapshot snapshot, ParallelIndexScanDesc target)
+void index_parallelscan_initialize(Relation heapRelation, Relation indexRelation,
+								   Snapshot snapshot, ParallelIndexScanDesc target)
 {
-	Size		offset;
+	Size offset;
 
 	Assert(snapshot != InvalidSnapshot);
 
@@ -508,7 +498,7 @@ index_parallelscan_initialize(Relation heapRelation, Relation indexRelation,
 	/* aminitparallelscan is optional; assume no-op if not provided by AM */
 	if (indexRelation->rd_indam->aminitparallelscan != NULL)
 	{
-		void	   *amtarget;
+		void *amtarget;
 
 		amtarget = OffsetToPointer(target, offset);
 		indexRelation->rd_indam->aminitparallelscan(amtarget);
@@ -519,8 +509,7 @@ index_parallelscan_initialize(Relation heapRelation, Relation indexRelation,
  *		index_parallelrescan  - (re)start a parallel scan of an index
  * ----------------
  */
-void
-index_parallelrescan(IndexScanDesc scan)
+void index_parallelrescan(IndexScanDesc scan)
 {
 	SCAN_CHECKS;
 
@@ -541,7 +530,7 @@ IndexScanDesc
 index_beginscan_parallel(Relation heaprel, Relation indexrel, int nkeys,
 						 int norderbys, ParallelIndexScanDesc pscan)
 {
-	Snapshot	snapshot;
+	Snapshot snapshot;
 	IndexScanDesc scan;
 
 	Assert(RelationGetRelid(heaprel) == pscan->ps_relid);
@@ -573,7 +562,7 @@ index_beginscan_parallel(Relation heaprel, Relation indexrel, int nkeys,
 ItemPointer
 index_getnext_tid(IndexScanDesc scan, ScanDirection direction)
 {
-	bool		found;
+	bool found;
 
 	SCAN_CHECKS;
 	CHECK_SCAN_PROCEDURE(amgettuple);
@@ -596,13 +585,9 @@ index_getnext_tid(IndexScanDesc scan, ScanDirection direction)
 	/* If we're out of index entries, we're done */
 	if (!found)
 	{
-		if (scan->callbyIndexNext && scan->hasRowSecurity){
-			FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-			if (logfile != NULL) {
-				fprintf(logfile, "[index_getnetxt_slot] return tid for RLS.\n");
-				fflush(logfile);
-				fclose(logfile);
-			}
+		if (scan->callbyIndexNext && scan->hasRowSecurity)
+		{
+
 			return &scan->xs_heaptid;
 		}
 		/* release resources (like buffer pins) from table accesses */
@@ -637,11 +622,10 @@ index_getnext_tid(IndexScanDesc scan, ScanDirection direction)
  * enough information to do it efficiently in the general case.
  * ----------------
  */
-bool
-index_fetch_heap(IndexScanDesc scan, TupleTableSlot *slot)
+bool index_fetch_heap(IndexScanDesc scan, TupleTableSlot *slot)
 {
-	bool		all_dead = false;
-	bool		found;
+	bool all_dead = false;
+	bool found;
 
 	found = table_index_fetch_tuple(scan->xs_heapfetch, &scan->xs_heaptid,
 									scan->xs_snapshot, slot,
@@ -678,15 +662,8 @@ index_fetch_heap(IndexScanDesc scan, TupleTableSlot *slot)
  * enough information to do it efficiently in the general case.
  * ----------------
  */
-bool
-index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *slot)
+bool index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *slot)
 {
-	FILE *logfile = fopen("/Users/yingyuliu/Desktop/pgsql/data/logfile.txt", "a+");
-    if (logfile != NULL) {
-        fprintf(logfile, "[index_getnext_slot] %s\n", scan->callbyIndexNext==true? "IndexNext": "");
-		fflush(logfile);
-        fclose(logfile);
-    }
 
 	for (;;)
 	{
@@ -699,11 +676,10 @@ index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *
 
 			/* If we're out of index entries, we're done */
 			if (tid == NULL)
-				break;	
+				break;
 
 			Assert(ItemPointerEquals(tid, &scan->xs_heaptid));
 		}
-
 
 		/*
 		 * Fetch the next (or only) visible heap tuple for this index entry.
@@ -731,10 +707,9 @@ index_getnext_slot(IndexScanDesc scan, ScanDirection direction, TupleTableSlot *
  * approximate, so it should only be used for statistical purposes.)
  * ----------------
  */
-int64
-index_getbitmap(IndexScanDesc scan, TIDBitmap *bitmap)
+int64 index_getbitmap(IndexScanDesc scan, TIDBitmap *bitmap)
 {
-	int64		ntids;
+	int64 ntids;
 
 	SCAN_CHECKS;
 	CHECK_SCAN_PROCEDURE(amgetbitmap);
@@ -767,7 +742,7 @@ index_bulk_delete(IndexVacuumInfo *info,
 				  IndexBulkDeleteCallback callback,
 				  void *callback_state)
 {
-	Relation	indexRelation = info->index;
+	Relation indexRelation = info->index;
 
 	RELATION_CHECKS;
 	CHECK_REL_PROCEDURE(ambulkdelete);
@@ -786,7 +761,7 @@ IndexBulkDeleteResult *
 index_vacuum_cleanup(IndexVacuumInfo *info,
 					 IndexBulkDeleteResult *istat)
 {
-	Relation	indexRelation = info->index;
+	Relation indexRelation = info->index;
 
 	RELATION_CHECKS;
 	CHECK_REL_PROCEDURE(amvacuumcleanup);
@@ -801,8 +776,7 @@ index_vacuum_cleanup(IndexVacuumInfo *info,
  *		column?
  * ----------------
  */
-bool
-index_can_return(Relation indexRelation, int attno)
+bool index_can_return(Relation indexRelation, int attno)
 {
 	RELATION_CHECKS;
 
@@ -845,12 +819,12 @@ index_getprocid(Relation irel,
 				uint16 procnum)
 {
 	RegProcedure *loc;
-	int			nproc;
-	int			procindex;
+	int nproc;
+	int procindex;
 
 	nproc = irel->rd_indam->amsupport;
 
-	Assert(procnum > 0 && procnum <= (uint16) nproc);
+	Assert(procnum > 0 && procnum <= (uint16)nproc);
 
 	procindex = (nproc * (attnum - 1)) + (procnum - 1);
 
@@ -878,15 +852,15 @@ index_getprocinfo(Relation irel,
 				  AttrNumber attnum,
 				  uint16 procnum)
 {
-	FmgrInfo   *locinfo;
-	int			nproc;
-	int			optsproc;
-	int			procindex;
+	FmgrInfo *locinfo;
+	int nproc;
+	int optsproc;
+	int procindex;
 
 	nproc = irel->rd_indam->amsupport;
 	optsproc = irel->rd_indam->amoptsprocnum;
 
-	Assert(procnum > 0 && procnum <= (uint16) nproc);
+	Assert(procnum > 0 && procnum <= (uint16)nproc);
 
 	procindex = (nproc * (attnum - 1)) + (procnum - 1);
 
@@ -921,7 +895,7 @@ index_getprocinfo(Relation irel,
 		if (procnum != optsproc)
 		{
 			/* Initialize locinfo->fn_expr with opclass options Const */
-			bytea	  **attoptions = RelationGetIndexAttOptions(irel, false);
+			bytea **attoptions = RelationGetIndexAttOptions(irel, false);
 			MemoryContext oldcxt = MemoryContextSwitchTo(irel->rd_indexcxt);
 
 			set_fn_opclass_options(locinfo, attoptions[attnum - 1]);
@@ -941,12 +915,11 @@ index_getprocinfo(Relation irel,
  *		for a possible recheck.
  * ----------------
  */
-void
-index_store_float8_orderby_distances(IndexScanDesc scan, Oid *orderByTypes,
-									 IndexOrderByDistance *distances,
-									 bool recheckOrderBy)
+void index_store_float8_orderby_distances(IndexScanDesc scan, Oid *orderByTypes,
+										  IndexOrderByDistance *distances,
+										  bool recheckOrderBy)
 {
-	int			i;
+	int i;
 
 	Assert(distances || !recheckOrderBy);
 
@@ -968,7 +941,7 @@ index_store_float8_orderby_distances(IndexScanDesc scan, Oid *orderByTypes,
 			}
 			else
 			{
-				scan->xs_orderbyvals[i] = (Datum) 0;
+				scan->xs_orderbyvals[i] = (Datum)0;
 				scan->xs_orderbynulls[i] = true;
 			}
 		}
@@ -977,12 +950,12 @@ index_store_float8_orderby_distances(IndexScanDesc scan, Oid *orderByTypes,
 			/* convert distance function's result to ORDER BY type */
 			if (distances && !distances[i].isnull)
 			{
-				scan->xs_orderbyvals[i] = Float4GetDatum((float4) distances[i].value);
+				scan->xs_orderbyvals[i] = Float4GetDatum((float4)distances[i].value);
 				scan->xs_orderbynulls[i] = false;
 			}
 			else
 			{
-				scan->xs_orderbyvals[i] = (Datum) 0;
+				scan->xs_orderbyvals[i] = (Datum)0;
 				scan->xs_orderbynulls[i] = true;
 			}
 		}
@@ -1013,9 +986,9 @@ bytea *
 index_opclass_options(Relation indrel, AttrNumber attnum, Datum attoptions,
 					  bool validate)
 {
-	int			amoptsprocnum = indrel->rd_indam->amoptsprocnum;
-	Oid			procid = InvalidOid;
-	FmgrInfo   *procinfo;
+	int amoptsprocnum = indrel->rd_indam->amoptsprocnum;
+	Oid procid = InvalidOid;
+	FmgrInfo *procinfo;
 	local_relopts relopts;
 
 	/* fetch options support procedure if specified */
@@ -1024,12 +997,12 @@ index_opclass_options(Relation indrel, AttrNumber attnum, Datum attoptions,
 
 	if (!OidIsValid(procid))
 	{
-		Oid			opclass;
-		Datum		indclassDatum;
-		oidvector  *indclass;
+		Oid opclass;
+		Datum indclassDatum;
+		oidvector *indclass;
 
 		if (!DatumGetPointer(attoptions))
-			return NULL;		/* ok, no options, no procedure */
+			return NULL; /* ok, no options, no procedure */
 
 		/*
 		 * Report an error if the opclass's options-parsing procedure does not
@@ -1037,7 +1010,7 @@ index_opclass_options(Relation indrel, AttrNumber attnum, Datum attoptions,
 		 */
 		indclassDatum = SysCacheGetAttrNotNull(INDEXRELID, indrel->rd_indextuple,
 											   Anum_pg_index_indclass);
-		indclass = (oidvector *) DatumGetPointer(indclassDatum);
+		indclass = (oidvector *)DatumGetPointer(indclassDatum);
 		opclass = indclass->values[attnum - 1];
 
 		ereport(ERROR,
@@ -1050,7 +1023,7 @@ index_opclass_options(Relation indrel, AttrNumber attnum, Datum attoptions,
 
 	procinfo = index_getprocinfo(indrel, attnum, amoptsprocnum);
 
-	(void) FunctionCall1(procinfo, PointerGetDatum(&relopts));
+	(void)FunctionCall1(procinfo, PointerGetDatum(&relopts));
 
 	return build_local_reloptions(&relopts, attoptions, validate);
 }
